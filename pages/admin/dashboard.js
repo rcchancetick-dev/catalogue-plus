@@ -25,7 +25,7 @@ export default function AdminDashboard() {
     fetch('/api/loans').then(r => r.json()).then(d => setAllLoans(d.loans || [])).catch(() => {});
     fetch('/api/admin/admins').then(r => r.json()).then(d => setAdmins(d.admins || [])).catch(() => {});
   }
-  async function handleLogout() { await fetch('/api/admin-logout', { method: 'POST' }); router.push('/admin/connexion'); }
+  async function handleLogout() { await fetch('/api/auth/admin-logout', { method: 'POST' }); router.push('/admin/connexion'); }
   async function handleAddBook(e) {
     e.preventDefault();
     try { const res = await fetch('/api/books', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newBook) }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); setGeneratedQr({ qr: data.book.qr_code_data, titre: data.book.titre, url: data.qrUrl }); setShowAddBook(false); setNewBook({ titre: '', auteur: '', isbn: '', editeur: '', annee_publication: '', categorie: '', langue: 'Francais', nombre_pages: '', description: '', couverture_url: '', emplacement: '', nombre_exemplaires: 1 }); loadAll(); } catch (err) { showToast(err.message, 'error'); }
