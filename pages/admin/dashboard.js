@@ -3,9 +3,10 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import Toast from '../../components/Toast';
+import Icon from '../../components/Icon';
 import AnimatedButton from '../../components/animations/AnimatedButton';
 
-const TABS = [{ id: 'stats', label: '📊 Statistiques' },{ id: 'livres', label: '📚 Livres' },{ id: 'emprunts', label: "📩 Demandes d'emprunt" },{ id: 'historique', label: '🕒 Historique' },{ id: 'admins', label: '👤 Administrateurs' },{ id: 'export', label: '⬇️ Exports' }];
+const TABS = [{ id: 'stats', label: 'Statistiques', icon: 'bar-chart' },{ id: 'livres', label: 'Livres', icon: 'book' },{ id: 'emprunts', label: "Demandes d'emprunt", icon: 'mail' },{ id: 'historique', label: 'Historique', icon: 'clock' },{ id: 'admins', label: 'Administrateurs', icon: 'user' },{ id: 'export', label: 'Exports', icon: 'download' }];
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function AdminDashboard() {
     fetch('/api/loans').then(r => r.json()).then(d => setAllLoans(d.loans || [])).catch(() => {});
     fetch('/api/admin/admins').then(r => r.json()).then(d => setAdmins(d.admins || [])).catch(() => {});
   }
-  async function handleLogout() { await fetch('/api/auth/admin-logout', { method: 'POST' }); router.push('/admin/connexion'); }
+  async function handleLogout() { await fetch('/api/admin-logout', { method: 'POST' }); router.push('/admin/connexion'); }
   async function handleAddBook(e) {
     e.preventDefault();
     try { const res = await fetch('/api/books', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newBook) }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); setGeneratedQr({ qr: data.book.qr_code_data, titre: data.book.titre, url: data.qrUrl }); setShowAddBook(false); setNewBook({ titre: '', auteur: '', isbn: '', editeur: '', annee_publication: '', categorie: '', langue: 'Francais', nombre_pages: '', description: '', couverture_url: '', emplacement: '', nombre_exemplaires: 1 }); loadAll(); } catch (err) { showToast(err.message, 'error'); }
@@ -42,10 +43,10 @@ export default function AdminDashboard() {
       <Toast message={toast} type={toastType} onClose={() => setToast('')} />
       <div className="admin-layout">
         <aside className="admin-sidebar">
-          <div className="admin-sidebar-brand">📚 Catalogue+ <span>Admin</span></div>
+          <div className="admin-sidebar-brand"><Icon name="book" size={20} /> Catalogue+ <span>Admin</span></div>
           <p className="admin-sidebar-user">{admin.prenom} {admin.nom}<br /><small>{admin.role}</small></p>
-          <nav>{TABS.map(t => <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}>{t.label}</button>)}</nav>
-          <button className="admin-logout-btn" onClick={handleLogout}>🚪 Deconnexion</button>
+          <nav>{TABS.map(t => <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}><Icon name={t.icon} size={16} /> {t.label}</button>)}</nav>
+          <button className="admin-logout-btn" onClick={handleLogout}><Icon name="log-out" size={16} /> Deconnexion</button>
         </aside>
         <main className="admin-main">
           <AnimatePresence mode="wait">
@@ -69,7 +70,7 @@ export default function AdminDashboard() {
               <motion.div key="livres" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div className="admin-section-header"><h1>Gestion des livres</h1><AnimatedButton className="btn-primary" onClick={() => setShowAddBook(true)}>+ Ajouter un livre</AnimatedButton></div>
                 <table className="admin-table"><thead><tr><th>Titre</th><th>Auteur</th><th>Categorie</th><th>Dispo</th><th>Statut</th><th>Actions</th></tr></thead>
-                  <tbody>{books.map(b => (<tr key={b.id}><td>{b.titre}</td><td>{b.auteur}</td><td>{b.categorie || '-'}</td><td>{b.exemplaires_disponibles}/{b.nombre_exemplaires}</td><td><span className={'status-badge ' + (b.statut === 'disponible' ? 'status-active' : 'status-pending')}>{b.statut}</span></td><td><button className="btn-small" onClick={() => setGeneratedQr({ qr: b.qr_code_data, titre: b.titre, url: (process.env.NEXT_PUBLIC_SITE_URL || '') + '/livre/' + b.uid })}>QR Code</button>{b.exemplaires_disponibles < b.nombre_exemplaires && <button className="btn-small btn-small-success" onClick={() => handleMarkReturned(b.uid)}>Marquer rendu</button>}</td></tr>))}</tbody>
+                  <tbody>{books.map(b => (<tr key={b.id}><td>{b.titre}</td><td>{b.auteur}</td><td>{b.categorie || '-'}</td><td>{b.exemplaires_disponibles}/{b.nombre_exemplaires}</td><td><span className={'status-badge ' + (b.statut === 'disponible' ? 'status-active' : 'status-pending')}>{b.statut}</span></td><td><button className="btn-small" onClick={() => setGeneratedQr({ qr: b.qr_code_data, titre: b.titre, url: (process.env.NEXT_PUBLIC_SITE_URL || '') + '/livre/' + b.uid })}><Icon name="qr-code" size={13} /> QR</button>{b.exemplaires_disponibles < b.nombre_exemplaires && <button className="btn-small btn-small-success" onClick={() => handleMarkReturned(b.uid)}>Marquer rendu</button>}</td></tr>))}</tbody>
                 </table>
               </motion.div>
             )}
@@ -103,9 +104,9 @@ export default function AdminDashboard() {
               <motion.div key="export" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <h1>Exporter les donnees</h1>
                 <div className="export-grid">
-                  <div className="export-card"><h3>📚 Livres</h3><a href="/api/admin/export-excel?type=livres" className="btn-secondary">Excel</a><a href="/api/admin/export-pdf?type=livres" className="btn-secondary">PDF</a></div>
-                  <div className="export-card"><h3>📩 Emprunts</h3><a href="/api/admin/export-excel?type=emprunts" className="btn-secondary">Excel</a><a href="/api/admin/export-pdf?type=emprunts" className="btn-secondary">PDF</a></div>
-                  <div className="export-card"><h3>👥 Utilisateurs</h3><a href="/api/admin/export-excel?type=utilisateurs" className="btn-secondary">Excel</a></div>
+                  <div className="export-card"><h3><Icon name="book" size={20} /> Livres</h3><a href="/api/admin/export-excel?type=livres" className="btn-secondary">Excel</a><a href="/api/admin/export-pdf?type=livres" className="btn-secondary">PDF</a></div>
+                  <div className="export-card"><h3><Icon name="mail" size={20} /> Emprunts</h3><a href="/api/admin/export-excel?type=emprunts" className="btn-secondary">Excel</a><a href="/api/admin/export-pdf?type=emprunts" className="btn-secondary">PDF</a></div>
+                  <div className="export-card"><h3><Icon name="users" size={20} /> Utilisateurs</h3><a href="/api/admin/export-excel?type=utilisateurs" className="btn-secondary">Excel</a></div>
                 </div>
               </motion.div>
             )}
@@ -135,7 +136,7 @@ export default function AdminDashboard() {
             <motion.div className="modal-content modal-qr" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()}>
               <h2>QR Code genere</h2><p>{generatedQr.titre}</p>
               <img src={generatedQr.qr} alt="QR Code" style={{ width: '250px', margin: '0 auto', display: 'block' }} />
-              <div className="modal-actions"><button className="btn-secondary" onClick={() => setGeneratedQr(null)}>Fermer</button><AnimatedButton className="btn-primary" onClick={printQr}>🖨️ Imprimer</AnimatedButton></div>
+              <div className="modal-actions"><button className="btn-secondary" onClick={() => setGeneratedQr(null)}>Fermer</button><AnimatedButton className="btn-primary" onClick={printQr}><Icon name="printer" size={16} /> Imprimer</AnimatedButton></div>
             </motion.div>
           </motion.div>
         )}
