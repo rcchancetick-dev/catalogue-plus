@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Toast from '../../components/Toast';
+import Icon from '../../components/Icon';
 import AnimatedButton from '../../components/animations/AnimatedButton';
 export default function FicheLivre() {
   const router = useRouter(); const { uid } = router.query;
@@ -32,12 +33,12 @@ export default function FicheLivre() {
       <section className="section">
         {loading ? <p className="loading-text">Chargement...</p> : notFound ? (<div className="not-found-box"><h2>Livre introuvable</h2><p>Ce QR code ne correspond a aucun livre, ou vous etes hors-ligne sans cache.</p></div>) : (
           <motion.div className="book-detail" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="book-detail-cover">{book.couverture_url ? <img src={book.couverture_url} alt={book.titre} /> : <div className="book-detail-cover-placeholder">📖</div>}</div>
+            <div className="book-detail-cover">{book.couverture_url ? <img src={book.couverture_url} alt={book.titre} /> : <div className="book-detail-cover-placeholder"><Icon name="book-open" size={64} /></div>}</div>
             <div className="book-detail-info">
               <span className={'badge ' + (book.exemplaires_disponibles > 0 ? 'badge-dispo' : 'badge-indispo')}>{book.exemplaires_disponibles > 0 ? book.exemplaires_disponibles + ' exemplaire(s) disponible(s)' : 'Aucun exemplaire disponible'}</span>
               <h1>{book.titre}</h1><p className="book-detail-author">par {book.auteur}</p>
               <div className="book-detail-meta">
-                {book.editeur && <span>📗 {book.editeur}</span>}{book.annee_publication && <span>📅 {book.annee_publication}</span>}{book.categorie && <span>🏷️ {book.categorie}</span>}{book.nombre_pages && <span>📄 {book.nombre_pages} pages</span>}{book.langue && <span>🌐 {book.langue}</span>}{book.emplacement && <span>📍 {book.emplacement}</span>}
+                {book.editeur && <span><Icon name="book" size={14} /> {book.editeur}</span>}{book.annee_publication && <span><Icon name="calendar" size={14} /> {book.annee_publication}</span>}{book.categorie && <span><Icon name="tag" size={14} /> {book.categorie}</span>}{book.nombre_pages && <span><Icon name="file-text" size={14} /> {book.nombre_pages} pages</span>}{book.langue && <span><Icon name="globe" size={14} /> {book.langue}</span>}{book.emplacement && <span><Icon name="map-pin" size={14} /> {book.emplacement}</span>}
               </div>
               {book.description && <p className="book-detail-desc">{book.description}</p>}
               {book.isbn && <p className="book-detail-isbn">ISBN : {book.isbn}</p>}

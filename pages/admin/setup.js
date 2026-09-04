@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import Toast from '../../components/Toast';
+import Icon from '../../components/Icon';
 import AnimatedButton from '../../components/animations/AnimatedButton';
 export default function AdminSetup() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function AdminSetup() {
       <Toast message={toast} type={toastType} onClose={() => setToast('')} />
       <section className="admin-login-section">
         <motion.div className="admin-login-card" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-          <div className="admin-login-icon">⚙️</div><h1>Configuration initiale</h1><p>Cette page ne fonctionne qu'une seule fois, tant qu'aucun admin n'existe.</p>
+          <div className="admin-login-icon"><Icon name="settings" size={40} /></div><h1>Configuration initiale</h1><p>Cette page ne fonctionne qu'une seule fois, tant qu'aucun admin n'existe.</p>
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-row"><div><label>Nom</label><input required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} /></div><div><label>Prenom</label><input required value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} /></div></div>
             <label>Email</label><input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />

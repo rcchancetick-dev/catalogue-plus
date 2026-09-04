@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import Toast from '../../components/Toast';
+import Icon from '../../components/Icon';
 import AnimatedButton from '../../components/animations/AnimatedButton';
 export default function AdminLogin() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function AdminLogin() {
       <Toast message={toast} type={toastType} onClose={() => setToast('')} />
       <section className="admin-login-section">
         <motion.div className="admin-login-card" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-          <div className="admin-login-icon">🔐</div><h1>Espace Administrateur</h1><p>Acces reserve au personnel autorise de la bibliotheque.</p>
+          <div className="admin-login-icon"><Icon name="lock" size={40} /></div><h1>Espace Administrateur</h1><p>Acces reserve au personnel autorise de la bibliotheque.</p>
           <form onSubmit={handleSubmit} className="auth-form">
             <label>Email administrateur</label><input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <label>Mot de passe</label><input type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
