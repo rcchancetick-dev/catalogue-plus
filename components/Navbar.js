@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Icon from './Icon';
 export default function Navbar({ user, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <Link href="/" className="navbar-brand"><span className="brand-icon">📚</span><span>Catalogue<span className="brand-plus">+</span></span></Link>
+        <Link href="/" className="navbar-brand"><Icon name="book" size={24} className="brand-icon" /><span>Catalogue<span className="brand-plus">+</span></span></Link>
         <div className="navbar-links-desktop">
           <Link href="/catalogue">Catalogue</Link><Link href="/#a-propos">A propos</Link><Link href="/#contact">Contact</Link>
           {user ? (<div className="navbar-user"><span>Bonjour, {user.prenom}</span><Link href="/mes-emprunts" className="btn-nav-secondary">Mes emprunts</Link><button className="btn-nav-logout" onClick={onLogout}>Deconnexion</button></div>) : <Link href="/connexion" className="btn-nav-primary">Connexion</Link>}
