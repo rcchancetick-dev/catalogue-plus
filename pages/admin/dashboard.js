@@ -45,8 +45,8 @@ export default function AdminDashboard() {
         <aside className="admin-sidebar">
           <div className="admin-sidebar-brand"><Icon name="book" size={20} /> Catalogue+ <span>Admin</span></div>
           <p className="admin-sidebar-user">{admin.prenom} {admin.nom}<br /><small>{admin.role}</small></p>
-          <nav>{TABS.map(t => <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}><Icon name={t.icon} size={16} /> {t.label}</button>)}</nav>
-          <button className="admin-logout-btn" onClick={handleLogout}><Icon name="log-out" size={16} /> Deconnexion</button>
+          <nav>{TABS.map(t => <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}><Icon name={t.icon} size={16} /> <span>{t.label}</span></button>)}</nav>
+          <button className="admin-logout-btn" onClick={handleLogout}><Icon name="log-out" size={16} /> <span>Deconnexion</span></button>
         </aside>
         <main className="admin-main">
           <AnimatePresence mode="wait">
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
                   <div className="admin-stat-card danger"><span>{stats.overdueLoans}</span><p>Emprunts en retard</p></div>
                 </div>
                 <h2>Livres les plus empruntes</h2>
-                <table className="admin-table"><thead><tr><th>Titre</th><th>Auteur</th><th>Nb emprunts</th></tr></thead><tbody>{stats.topBooks.map((b, i) => <tr key={i}><td>{b.titre}</td><td>{b.auteur}</td><td>{b.nb_emprunts}</td></tr>)}</tbody></table>
+                <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Titre</th><th>Auteur</th><th>Nb emprunts</th></tr></thead><tbody>{stats.topBooks.map((b, i) => <tr key={i}><td>{b.titre}</td><td>{b.auteur}</td><td>{b.nb_emprunts}</td></tr>)}</tbody></table></div>
                 <h2>Activite recente</h2>
                 <ul className="admin-activity-list">{stats.recentActivity.slice(0, 10).map((a) => <li key={a.id}><strong>{a.admin_prenom} {a.admin_nom}</strong> — {a.description} <small>({new Date(a.created_at).toLocaleString('fr-FR')})</small></li>)}</ul>
               </motion.div>
@@ -69,35 +69,35 @@ export default function AdminDashboard() {
             {tab === 'livres' && (
               <motion.div key="livres" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div className="admin-section-header"><h1>Gestion des livres</h1><AnimatedButton className="btn-primary" onClick={() => setShowAddBook(true)}>+ Ajouter un livre</AnimatedButton></div>
-                <table className="admin-table"><thead><tr><th>Titre</th><th>Auteur</th><th>Categorie</th><th>Dispo</th><th>Statut</th><th>Actions</th></tr></thead>
+                <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Titre</th><th>Auteur</th><th>Categorie</th><th>Dispo</th><th>Statut</th><th>Actions</th></tr></thead>
                   <tbody>{books.map(b => (<tr key={b.id}><td>{b.titre}</td><td>{b.auteur}</td><td>{b.categorie || '-'}</td><td>{b.exemplaires_disponibles}/{b.nombre_exemplaires}</td><td><span className={'status-badge ' + (b.statut === 'disponible' ? 'status-active' : 'status-pending')}>{b.statut}</span></td><td><button className="btn-small" onClick={() => setGeneratedQr({ qr: b.qr_code_data, titre: b.titre, url: (process.env.NEXT_PUBLIC_SITE_URL || '') + '/livre/' + b.uid })}><Icon name="qr-code" size={13} /> QR</button>{b.exemplaires_disponibles < b.nombre_exemplaires && <button className="btn-small btn-small-success" onClick={() => handleMarkReturned(b.uid)}>Marquer rendu</button>}</td></tr>))}</tbody>
-                </table>
+                </table></div>
               </motion.div>
             )}
             {tab === 'emprunts' && (
               <motion.div key="emprunts" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <h1>Demandes d'emprunt en attente</h1>
                 {pendingLoans.length === 0 ? <p className="loading-text">Aucune demande en attente.</p> : (
-                  <table className="admin-table"><thead><tr><th>Etudiant</th><th>Livre</th><th>Duree</th><th>Date demande</th><th>Actions</th></tr></thead>
+                  <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Etudiant</th><th>Livre</th><th>Duree</th><th>Date demande</th><th>Actions</th></tr></thead>
                     <tbody>{pendingLoans.map(l => (<tr key={l.id}><td>{l.user_prenom} {l.user_nom}<br /><small>{l.user_email}</small></td><td>{l.livre_titre}</td><td>{l.duree_jours} jours</td><td>{new Date(l.date_demande).toLocaleDateString('fr-FR')}</td><td><button className="btn-small btn-small-success" onClick={() => handleValidateLoan(l.id)}>Valider</button><button className="btn-small btn-small-danger" onClick={() => setRejectingLoan(l.id)}>Refuser</button></td></tr>))}</tbody>
-                  </table>
+                  </table></div>
                 )}
               </motion.div>
             )}
             {tab === 'historique' && (
               <motion.div key="historique" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <h1>Historique complet des emprunts</h1>
-                <table className="admin-table"><thead><tr><th>Etudiant</th><th>Livre</th><th>Statut</th><th>Demande</th><th>Retour prevu</th></tr></thead>
+                <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Etudiant</th><th>Livre</th><th>Statut</th><th>Demande</th><th>Retour prevu</th></tr></thead>
                   <tbody>{allLoans.map(l => (<tr key={l.id}><td>{l.user_prenom} {l.user_nom}</td><td>{l.livre_titre}</td><td>{l.statut}</td><td>{new Date(l.date_demande).toLocaleDateString('fr-FR')}</td><td>{l.date_retour_prevue ? new Date(l.date_retour_prevue).toLocaleDateString('fr-FR') : '-'}</td></tr>))}</tbody>
-                </table>
+                </table></div>
               </motion.div>
             )}
             {tab === 'admins' && (
               <motion.div key="admins" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div className="admin-section-header"><h1>Administrateurs</h1>{admin.role === 'super_admin' && <AnimatedButton className="btn-primary" onClick={() => setShowAddAdmin(true)}>+ Ajouter un admin</AnimatedButton>}</div>
-                <table className="admin-table"><thead><tr><th>Nom</th><th>Email</th><th>Role</th><th>Statut</th>{admin.role === 'super_admin' && <th>Actions</th>}</tr></thead>
+                <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Nom</th><th>Email</th><th>Role</th><th>Statut</th>{admin.role === 'super_admin' && <th>Actions</th>}</tr></thead>
                   <tbody>{admins.map(a => (<tr key={a.id}><td>{a.prenom} {a.nom}</td><td>{a.email}</td><td>{a.role}</td><td>{a.is_active ? 'Actif' : 'Desactive'}</td>{admin.role === 'super_admin' && <td><button className="btn-small" onClick={() => handleToggleAdmin(a.id)}>{a.is_active ? 'Desactiver' : 'Reactiver'}</button></td>}</tr>))}</tbody>
-                </table>
+                </table></div>
               </motion.div>
             )}
             {tab === 'export' && (
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
           <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setGeneratedQr(null)}>
             <motion.div className="modal-content modal-qr" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()}>
               <h2>QR Code genere</h2><p>{generatedQr.titre}</p>
-              <img src={generatedQr.qr} alt="QR Code" style={{ width: '250px', margin: '0 auto', display: 'block' }} />
+              <img src={generatedQr.qr} alt="QR Code" style={{ width: '250px', maxWidth: '100%', margin: '0 auto', display: 'block' }} />
               <div className="modal-actions"><button className="btn-secondary" onClick={() => setGeneratedQr(null)}>Fermer</button><AnimatedButton className="btn-primary" onClick={printQr}><Icon name="printer" size={16} /> Imprimer</AnimatedButton></div>
             </motion.div>
           </motion.div>
