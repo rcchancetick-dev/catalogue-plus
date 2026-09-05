@@ -3,6 +3,7 @@ import '../styles/password-field.css';
 import '../styles/responsive-fixes.css';
 import '../styles/dark-theme.css';
 import '../styles/navbar-mobile-actions.css';
+import '../styles/notifications.css';
 import { useEffect } from 'react';
 export default function App({ Component, pageProps }) {
   useEffect(() => {
