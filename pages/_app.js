@@ -6,6 +6,7 @@ import '../styles/navbar-mobile-actions.css';
 import '../styles/notifications.css';
 import '../styles/push-banner.css';
 import '../styles/navbar-admin-button.css';
+import '../styles/confirm-modal.css';
 import { useEffect } from 'react';
 export default function App({ Component, pageProps }) {
   useEffect(() => {
