@@ -1,10 +1,10 @@
 import sql from '../../../../lib/db';
-import { getAdminFromReq } from '../../../../lib/auth';
+import { getActiveAdminFromReq } from '../../../../lib/adminGuard';
 import { notifyUser } from '../../../../lib/notify';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Methode non autorisee' });
-  const admin = getAdminFromReq(req);
-  if (!admin) return res.status(401).json({ error: 'Acces reserve.' });
+  const admin = await getActiveAdminFromReq(req);
+  if (!admin) return res.status(401).json({ error: 'Acces reserve ou compte desactive.' });
   try {
     const { id } = req.query;
     const lr = await sql`SELECT * FROM loans WHERE id = ${id}`;

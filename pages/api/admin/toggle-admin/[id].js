@@ -1,8 +1,8 @@
 import sql from '../../../../lib/db';
-import { getAdminFromReq } from '../../../../lib/auth';
+import { getActiveAdminFromReq } from '../../../../lib/adminGuard';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Methode non autorisee' });
-  const admin = getAdminFromReq(req);
+  const admin = await getActiveAdminFromReq(req);
   if (!admin || admin.adminRole !== 'super_admin') return res.status(403).json({ error: 'Reserve au super-admin.' });
   try {
     const { id } = req.query;
