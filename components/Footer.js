@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="footer" id="contact">
@@ -7,7 +9,10 @@ export default function Footer() {
         <div className="footer-col"><h4>Confidentialite &amp; securite</h4><ul><li>Mots de passe chiffres (bcrypt)</li><li>Connexions HTTPS + cookies HttpOnly</li><li>Donnees sur Neon Postgres</li><li>Acces admin protege</li></ul></div>
         <div className="footer-col"><h4>Contact</h4><p>Bibliotheque ESPA<br />Antsiranana, Madagascar</p></div>
       </div>
-      <div className="footer-bottom"><p>© {new Date().getFullYear()} Catalogue+ — Projet academique ESPA. Tous droits reserves aux auteurs du projet.</p></div>
+      <div className="footer-bottom">
+        <p>© {new Date().getFullYear()} Catalogue+ — Projet academique ESPA. Tous droits reserves aux auteurs du projet.</p>
+        <Link href="/admin/connexion" className="footer-admin-link">Administration</Link>
+      </div>
     </footer>
   );
 }

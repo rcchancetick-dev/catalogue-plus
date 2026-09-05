@@ -16,10 +16,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [books, setBooks] = useState([]);
   const [online, setOnline] = useState(true);
-  const [logoClicks, setLogoClicks] = useState(0);
-  function handleLogoSecretClick() {
-    setLogoClicks((c) => { const next = c + 1; if (next >= 5) { window.location.href = '/admin/connexion'; return 0; } setTimeout(() => setLogoClicks(0), 2000); return next; });
-  }
+
   useEffect(() => {
     setOnline(navigator.onLine);
     const on = () => setOnline(true), off = () => setOnline(false);
@@ -37,7 +34,6 @@ export default function Home() {
       {user && <PushNotificationSetup />}
       <section className="hero">
         <FloatingBooks />
-        <span onClick={handleLogoSecretClick} className="hidden-admin-trigger" aria-hidden="true" />
         <motion.div className="hero-content" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.22,1,0.36,1] }}>
           <span className="hero-badge"><Icon name="graduation-cap" size={16} /> Mini-projet ESPA — 2eme annee</span>
           <h1>Scannez. Decouvrez. <span className="text-gradient">Empruntez.</span></h1>
