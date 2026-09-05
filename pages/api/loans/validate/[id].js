@@ -18,14 +18,20 @@ export default async function handler(req, res) {
     await sql`UPDATE loans SET statut='en_cours', date_validation=NOW(), date_emprunt=NOW(), date_retour_prevue=${d.toISOString().split('T')[0]}, valide_par=${admin.id} WHERE id=${id}`;
     await sql`UPDATE books SET exemplaires_disponibles=exemplaires_disponibles-1, statut=CASE WHEN exemplaires_disponibles-1<=0 THEN 'emprunte' ELSE statut END WHERE id=${book.id}`;
     await sql`INSERT INTO activity_log (type_action, description, admin_id, user_id) VALUES ('validation_emprunt', ${'Emprunt valide: ' + book.titre}, ${admin.id}, ${loan.user_id})`;
-    await notifyUser({
-      userId: loan.user_id,
-      type: 'emprunt_valide',
-      title: 'Emprunt valide !',
-      message: `Votre demande pour "${book.titre}" a ete acceptee. A rendre avant le ${d.toLocaleDateString('fr-FR')}.`,
-      loanId: loan.id,
-      bookId: book.id
-    });
+
+    try {
+      await notifyUser({
+        userId: loan.user_id,
+        type: 'emprunt_valide',
+        title: 'Emprunt valide !',
+        message: `Votre demande pour "${book.titre}" a ete acceptee. A rendre avant le ${d.toLocaleDateString('fr-FR')}.`,
+        loanId: loan.id,
+        bookId: book.id
+      });
+    } catch (notifErr) {
+      console.error('Notification non envoyee (non bloquant):', notifErr);
+    }
+
     return res.status(200).json({ message: 'Demande validee.' });
   } catch (e) { console.error(e); return res.status(500).json({ error: 'Erreur.' }); }
 }

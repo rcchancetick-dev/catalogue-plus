@@ -16,14 +16,20 @@ export default async function handler(req, res) {
       if (p.length > 0) return res.status(409).json({ error: 'Demande deja active pour ce livre.' });
       const duree = parseInt(dureeJours) || 14;
       const r = await sql`INSERT INTO loans (user_id, book_id, statut, duree_jours) VALUES (${user.id}, ${b.id}, 'en_attente', ${duree}) RETURNING *`;
-      const userInfo = await sql`SELECT nom, prenom FROM users WHERE id = ${user.id}`;
-      await notifyAdmins({
-        type: 'nouvelle_demande',
-        title: 'Nouvelle demande d\'emprunt',
-        message: `${userInfo[0].prenom} ${userInfo[0].nom} souhaite emprunter "${b.titre}" pour ${duree} jours.`,
-        loanId: r[0].id,
-        bookId: b.id
-      });
+
+      try {
+        const userInfo = await sql`SELECT nom, prenom FROM users WHERE id = ${user.id}`;
+        await notifyAdmins({
+          type: 'nouvelle_demande',
+          title: 'Nouvelle demande d\'emprunt',
+          message: `${userInfo[0].prenom} ${userInfo[0].nom} souhaite emprunter "${b.titre}" pour ${duree} jours.`,
+          loanId: r[0].id,
+          bookId: b.id
+        });
+      } catch (notifErr) {
+        console.error('Notification non envoyee (non bloquant):', notifErr);
+      }
+
       return res.status(201).json({ message: "Demande envoyee. L'administrateur va la traiter.", loan: r[0] });
     } catch (e) { console.error(e); return res.status(500).json({ error: 'Erreur.' }); }
   }
