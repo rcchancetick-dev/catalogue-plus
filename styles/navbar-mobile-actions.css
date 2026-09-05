@@ -1,0 +1,3 @@
+.navbar-mobile-actions{display:none;align-items:center;gap:8px;}
+@media (max-width:860px){.navbar-mobile-actions{display:flex;}.navbar-links-desktop{display:none;}}
+@media (min-width:861px){.navbar-mobile-actions{display:none;}}
