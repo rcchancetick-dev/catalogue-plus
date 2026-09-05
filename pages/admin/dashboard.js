@@ -16,10 +16,11 @@ export default function AdminDashboard() {
   const [pendingLoans, setPendingLoans] = useState([]); const [allLoans, setAllLoans] = useState([]); const [admins, setAdmins] = useState([]);
   const [toast, setToast] = useState(''); const [toastType, setToastType] = useState('info'); const [showAddBook, setShowAddBook] = useState(false); const [showAddAdmin, setShowAddAdmin] = useState(false);
   const [rejectingLoan, setRejectingLoan] = useState(null); const [motif, setMotif] = useState('');
+  const [confirmingToggle, setConfirmingToggle] = useState(null);
   const [newBook, setNewBook] = useState({ titre: '', auteur: '', isbn: '', editeur: '', annee_publication: '', categorie: '', langue: 'Francais', nombre_pages: '', description: '', couverture_url: '', emplacement: '', nombre_exemplaires: 1 });
   const [newAdmin, setNewAdmin] = useState({ nom: '', prenom: '', email: '', password: '', role: 'admin' }); const [generatedQr, setGeneratedQr] = useState(null);
   const modalOpenRef = useRef(false);
-  useEffect(() => { modalOpenRef.current = showAddBook || showAddAdmin || !!rejectingLoan || !!generatedQr; }, [showAddBook, showAddAdmin, rejectingLoan, generatedQr]);
+  useEffect(() => { modalOpenRef.current = showAddBook || showAddAdmin || !!rejectingLoan || !!generatedQr || !!confirmingToggle; }, [showAddBook, showAddAdmin, rejectingLoan, generatedQr, confirmingToggle]);
   function showToast(msg, type = 'info') { setToastType(type); setToast(msg); setTimeout(() => setToast(''), 4500); }
   useEffect(() => {
     fetch('/api/auth/admin-me').then(r => r.json()).then(d => { if (!d.admin) { router.push('/admin/connexion'); return; } setAdmin(d.admin); loadAll(); fetch('/api/admin/check-overdue', { method: 'POST' }).catch(() => {}); });
@@ -42,7 +43,11 @@ export default function AdminDashboard() {
   async function handleRejectLoan(id) { try { const res = await fetch('/api/loans/reject/' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ motif }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); setRejectingLoan(null); setMotif(''); loadAll(); } catch (err) { showToast(err.message, 'error'); } }
   async function handleMarkReturned(uid) { try { const res = await fetch('/api/books/return/' + uid, { method: 'POST' }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); loadAll(); } catch (err) { showToast(err.message, 'error'); } }
   async function handleAddAdmin(e) { e.preventDefault(); try { const res = await fetch('/api/admin/admins', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newAdmin) }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); setShowAddAdmin(false); setNewAdmin({ nom: '', prenom: '', email: '', password: '', role: 'admin' }); loadAll(); } catch (err) { showToast(err.message, 'error'); } }
-  async function handleToggleAdmin(id) { try { const res = await fetch('/api/admin/toggle-admin/' + id, { method: 'POST' }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); loadAll(); } catch (err) { showToast(err.message, 'error'); } }
+  async function confirmToggleAdmin() {
+    if (!confirmingToggle) return;
+    try { const res = await fetch('/api/admin/toggle-admin/' + confirmingToggle.id, { method: 'POST' }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); loadAll(); } catch (err) { showToast(err.message, 'error'); }
+    setConfirmingToggle(null);
+  }
   function printQr() { const w = window.open('', '_blank'); w.document.write('<html><head><title>QR Code - ' + generatedQr.titre + '</title></head><body style="text-align:center;font-family:sans-serif;padding:40px;"><h2>' + generatedQr.titre + '</h2><img src="' + generatedQr.qr + '" style="width:300px;" /><p>' + generatedQr.url + '</p><script>window.print()</script></body></html>'); }
   if (!admin) return null;
   return (
@@ -106,7 +111,7 @@ export default function AdminDashboard() {
               <motion.div key="admins" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div className="admin-section-header"><h1>Administrateurs</h1>{admin.role === 'super_admin' && <AnimatedButton className="btn-primary" onClick={() => setShowAddAdmin(true)}>+ Ajouter un admin</AnimatedButton>}</div>
                 <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Nom</th><th>Email</th><th>Role</th><th>Statut</th>{admin.role === 'super_admin' && <th>Actions</th>}</tr></thead>
-                  <tbody>{admins.map(a => (<tr key={a.id}><td>{a.prenom} {a.nom}</td><td>{a.email}</td><td>{a.role}</td><td>{a.is_active ? 'Actif' : 'Desactive'}</td>{admin.role === 'super_admin' && <td><button className="btn-small" onClick={() => handleToggleAdmin(a.id)}>{a.is_active ? 'Desactiver' : 'Reactiver'}</button></td>}</tr>))}</tbody>
+                  <tbody>{admins.map(a => (<tr key={a.id}><td>{a.prenom} {a.nom}</td><td>{a.email}</td><td>{a.role}</td><td>{a.is_active ? 'Actif' : 'Desactive'}</td>{admin.role === 'super_admin' && <td><button className={'btn-small ' + (a.is_active ? 'btn-small-danger' : 'btn-small-success')} onClick={() => setConfirmingToggle(a)}>{a.is_active ? 'Desactiver' : 'Reactiver'}</button></td>}</tr>))}</tbody>
                 </table></div>
               </motion.div>
             )}
@@ -170,6 +175,25 @@ export default function AdminDashboard() {
               <h2>Motif du refus</h2>
               <textarea rows={4} value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Ex: livre reserve, document endommage..." />
               <div className="modal-actions"><button className="btn-secondary" onClick={() => setRejectingLoan(null)}>Annuler</button><AnimatedButton className="btn-primary" onClick={() => handleRejectLoan(rejectingLoan)}>Confirmer le refus</AnimatedButton></div>
+            </motion.div>
+          </motion.div>
+        )}
+        {confirmingToggle && (
+          <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setConfirmingToggle(null)}>
+            <motion.div className="modal-content modal-confirm" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-confirm-icon"><Icon name="alert-triangle" size={28} /></div>
+              <h2>{confirmingToggle.is_active ? 'Desactiver cet administrateur ?' : 'Reactiver cet administrateur ?'}</h2>
+              <p>
+                {confirmingToggle.is_active
+                  ? <>Vous etes sur le point de desactiver le compte de <strong>{confirmingToggle.prenom} {confirmingToggle.nom}</strong> ({confirmingToggle.email}). Il ne pourra plus se connecter a l'espace administrateur tant que le compte n'est pas reactive.</>
+                  : <>Vous etes sur le point de reactiver le compte de <strong>{confirmingToggle.prenom} {confirmingToggle.nom}</strong> ({confirmingToggle.email}). Il pourra de nouveau se connecter a l'espace administrateur.</>}
+              </p>
+              <div className="modal-actions">
+                <button className="btn-secondary" onClick={() => setConfirmingToggle(null)}>Annuler</button>
+                <AnimatedButton className={confirmingToggle.is_active ? 'btn-danger' : 'btn-primary'} onClick={confirmToggleAdmin}>
+                  {confirmingToggle.is_active ? 'Oui, desactiver' : 'Oui, reactiver'}
+                </AnimatedButton>
+              </div>
             </motion.div>
           </motion.div>
         )}
