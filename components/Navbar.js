@@ -10,7 +10,10 @@ export default function Navbar({ user, onLogout }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    fetch('/api/auth/admin-me').then(r => r.json()).then(d => setIsAdmin(!!d.admin)).catch(() => {});
+    fetch('/api/auth/admin-me', { credentials: 'include', cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => setIsAdmin(!!d.admin))
+      .catch(() => setIsAdmin(false));
   }, []);
 
   return (
