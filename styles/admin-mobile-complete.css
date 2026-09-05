@@ -1,0 +1,192 @@
+@media (max-width: 1100px) {
+  .admin-layout {
+    display: flex !important;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .admin-sidebar {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    padding: 10px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 8px;
+    width: 100%;
+  }
+  .admin-sidebar::-webkit-scrollbar { display: none; }
+
+  .admin-sidebar-brand {
+    flex-shrink: 0;
+    font-size: 14px;
+    white-space: nowrap;
+    margin-right: 4px;
+  }
+  .admin-sidebar-brand span { display: none; }
+
+  .admin-sidebar-user { display: none; }
+
+  .notif-bell-wrapper { flex-shrink: 0; }
+
+  .admin-sidebar nav {
+    flex-direction: row;
+    flex: 1;
+    overflow-x: auto;
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    min-width: 0;
+  }
+  .admin-sidebar nav::-webkit-scrollbar { display: none; }
+  .admin-sidebar nav button {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .admin-view-site-btn,
+  .admin-logout-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 8px 10px;
+    font-size: 12.5px;
+    margin: 0;
+  }
+
+  .admin-main { padding: 16px; }
+}
+
+@media (max-width: 640px) {
+  .admin-sidebar-brand { font-size: 13px; }
+  .admin-sidebar nav button span,
+  .admin-view-site-btn span,
+  .admin-logout-btn span {
+    display: none;
+  }
+  .admin-sidebar nav button,
+  .admin-view-site-btn,
+  .admin-logout-btn {
+    padding: 8px;
+  }
+  .admin-main { padding: 12px; }
+  .admin-main h1 { font-size: 20px; }
+  .admin-main h2 { font-size: 16px; margin: 20px 0 10px; }
+}
+
+@media (max-width: 900px) {
+  .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+  .admin-stat-card { padding: 14px; }
+  .admin-stat-card span { font-size: 22px; }
+  .admin-stat-card p { font-size: 12px; }
+}
+@media (max-width: 420px) {
+  .admin-stats-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 640px) {
+  .admin-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .admin-section-header h1 { font-size: 20px; }
+  .admin-section-header button,
+  .admin-section-header a {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.admin-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 14px;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+.admin-table { min-width: 620px; width: 100%; }
+@media (max-width: 700px) {
+  .admin-table th, .admin-table td {
+    padding: 10px 12px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  .admin-table td small { font-size: 11px; }
+}
+
+@media (max-width: 640px) {
+  .admin-table td .btn-small {
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-activity-list li { padding: 10px 12px; font-size: 12.5px; }
+}
+
+@media (max-width: 700px) {
+  .export-grid { grid-template-columns: 1fr !important; gap: 14px; }
+  .export-card { padding: 18px; }
+  .export-card a { display: block; margin: 6px 0; }
+}
+
+@media (max-width: 560px) {
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal-content {
+    max-width: 100%;
+    width: 100%;
+    max-height: 94vh;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 18px;
+    overflow-y: auto;
+  }
+  .modal-content h2 { font-size: 18px; }
+  .modal-content .form-row { grid-template-columns: 1fr !important; }
+  .modal-actions { flex-direction: column-reverse; gap: 10px; }
+  .modal-actions button,
+  .modal-actions .btn-primary,
+  .modal-actions .btn-secondary,
+  .modal-actions .btn-danger {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-main .push-setup-banner {
+    margin: 0 0 16px 0;
+    padding: 10px 14px;
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 500px) {
+  .admin-sidebar .notif-panel {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+@media (max-width: 500px) {
+  .modal-qr img { width: 200px !important; }
+}
