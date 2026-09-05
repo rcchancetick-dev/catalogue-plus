@@ -1,0 +1,68 @@
+:root {
+  --transition-theme: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+body, .navbar, .book-card, .step-card, .trust-card, .auth-card, .admin-login-card,
+.admin-stat-card, .admin-table, .admin-activity-list, .loan-item, .export-card,
+.modal-content, .book-detail-cover, .emprunt-box {
+  transition: var(--transition-theme);
+}
+
+[data-theme="dark"] {
+  --bg: #0f1115;
+  --text: #e2e8f0;
+  --text-light: #94a3b8;
+  --border: #2a2f3a;
+  --shadow: 0 4px 24px rgba(0,0,0,0.35);
+}
+
+[data-theme="dark"] body { background: var(--bg); color: var(--text); }
+[data-theme="dark"] .navbar { background: rgba(15,17,21,0.85); border-bottom-color: var(--border); }
+[data-theme="dark"] .navbar-links-desktop a { color: var(--text); }
+[data-theme="dark"] .btn-nav-secondary { background: #1e2230; }
+[data-theme="dark"] .hero { background: linear-gradient(180deg, #14161d 0%, #0f1115 100%); }
+[data-theme="dark"] .hero-badge { background: #1a1d26; border-color: var(--border); color: var(--text); }
+[data-theme="dark"] .book-card, [data-theme="dark"] .step-card, [data-theme="dark"] .auth-card,
+[data-theme="dark"] .admin-login-card, [data-theme="dark"] .admin-stat-card, [data-theme="dark"] .admin-table,
+[data-theme="dark"] .admin-activity-list, [data-theme="dark"] .loan-item, [data-theme="dark"] .export-card,
+[data-theme="dark"] .modal-content {
+  background: #1a1d26;
+  border-color: var(--border);
+}
+[data-theme="dark"] .book-card-cover, [data-theme="dark"] .book-detail-cover, [data-theme="dark"] .emprunt-box {
+  background: #20242f;
+}
+[data-theme="dark"] .trust-card { border-color: var(--border); background: #1a1d26; }
+[data-theme="dark"] .admin-table th { background: #14161d; color: var(--text-light); }
+[data-theme="dark"] .admin-table td, [data-theme="dark"] .admin-table th { border-color: var(--border); }
+[data-theme="dark"] .auth-tabs { background: #14161d; }
+[data-theme="dark"] .auth-tabs button.active { background: #1a1d26; }
+[data-theme="dark"] .auth-form input, [data-theme="dark"] .auth-form select, [data-theme="dark"] .auth-form textarea,
+[data-theme="dark"] .search-bar input, [data-theme="dark"] .search-bar select {
+  background: #14161d;
+  border-color: var(--border);
+  color: var(--text);
+}
+[data-theme="dark"] .btn-secondary { background: #1a1d26; }
+[data-theme="dark"] .footer, [data-theme="dark"] .stats-section, [data-theme="dark"] .admin-sidebar,
+[data-theme="dark"] .admin-login-section {
+  background: #08090c;
+}
+[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7); }
+[data-theme="dark"] .password-toggle:hover { background: #20242f; }
+[data-theme="dark"] .btn-nav-secondary, [data-theme="dark"] .book-card-tag { color: #a5b4fc; }
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: var(--primary);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+[data-theme="dark"] .theme-toggle { background: #1e2230; color: #a5b4fc; }
