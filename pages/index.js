@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Icon from '../components/Icon';
+import PushNotificationSetup from '../components/PushNotificationSetup';
 import FadeInSection from '../components/animations/FadeInSection';
 import AnimatedButton from '../components/animations/AnimatedButton';
 import FloatingBooks from '../components/animations/FloatingBooks';
@@ -33,6 +34,7 @@ export default function Home() {
       <Head><title>Catalogue+ | Catalogue numerique de bibliotheque par QR Code</title></Head>
       <Navbar user={user} onLogout={handleLogout} />
       {!online && <div className="offline-banner"><Icon name="alert-triangle" size={16} /> Vous etes hors-ligne. Connectez-vous au Wi-Fi local de la bibliotheque pour continuer.</div>}
+      {user && <PushNotificationSetup />}
       <section className="hero">
         <FloatingBooks />
         <span onClick={handleLogoSecretClick} className="hidden-admin-trigger" aria-hidden="true" />
