@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import Toast from '../../components/Toast';
@@ -60,6 +61,7 @@ export default function AdminDashboard() {
           <p className="admin-sidebar-user">{admin.prenom} {admin.nom}<br /><small>{admin.role}</small></p>
           <NotificationBell scope="admin" />
           <nav>{TABS.map(t => <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}><Icon name={t.icon} size={16} /> <span>{t.label}</span></button>)}</nav>
+          <Link href="/" className="admin-view-site-btn"><Icon name="globe" size={16} /> <span>Voir le site</span></Link>
           <button className="admin-logout-btn" onClick={handleLogout}><Icon name="log-out" size={16} /> <span>Deconnexion</span></button>
         </aside>
         <main className="admin-main">
