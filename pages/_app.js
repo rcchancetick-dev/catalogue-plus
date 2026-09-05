@@ -9,6 +9,7 @@ import '../styles/navbar-admin-button.css';
 import '../styles/confirm-modal.css';
 import '../styles/footer-admin-link.css';
 import '../styles/admin-view-site-button.css';
+import '../styles/admin-mobile-complete.css';
 import { useEffect } from 'react';
 export default function App({ Component, pageProps }) {
   useEffect(() => {
