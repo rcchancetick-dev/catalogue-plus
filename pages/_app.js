@@ -12,6 +12,7 @@ import '../styles/admin-view-site-button.css';
 import '../styles/admin-mobile-complete.css';
 import '../styles/notif-mobile-fix.css';
 import '../styles/notif-text-wrap-fix.css';
+import '../styles/notif-viewport-fix.css';
 import { useEffect } from 'react';
 export default function App({ Component, pageProps }) {
   useEffect(() => {
