@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Toast from '../../components/Toast';
 import Icon from '../../components/Icon';
 import NotificationBell from '../../components/NotificationBell';
+import PushNotificationSetup from '../../components/PushNotificationSetup';
 import AnimatedButton from '../../components/animations/AnimatedButton';
 
 const TABS = [{ id: 'stats', label: 'Statistiques', icon: 'bar-chart' },{ id: 'livres', label: 'Livres', icon: 'book' },{ id: 'emprunts', label: "Demandes d'emprunt", icon: 'mail' },{ id: 'historique', label: 'Historique', icon: 'clock' },{ id: 'admins', label: 'Administrateurs', icon: 'user' },{ id: 'export', label: 'Exports', icon: 'download' }];
@@ -51,6 +52,7 @@ export default function AdminDashboard() {
           <button className="admin-logout-btn" onClick={handleLogout}><Icon name="log-out" size={16} /> <span>Deconnexion</span></button>
         </aside>
         <main className="admin-main">
+          <PushNotificationSetup />
           <AnimatePresence mode="wait">
             {tab === 'stats' && stats && (
               <motion.div key="stats" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
