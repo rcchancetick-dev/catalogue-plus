@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import Toast from '../../components/Toast';
 import Icon from '../../components/Icon';
+import NotificationBell from '../../components/NotificationBell';
 import AnimatedButton from '../../components/animations/AnimatedButton';
 
 const TABS = [{ id: 'stats', label: 'Statistiques', icon: 'bar-chart' },{ id: 'livres', label: 'Livres', icon: 'book' },{ id: 'emprunts', label: "Demandes d'emprunt", icon: 'mail' },{ id: 'historique', label: 'Historique', icon: 'clock' },{ id: 'admins', label: 'Administrateurs', icon: 'user' },{ id: 'export', label: 'Exports', icon: 'download' }];
@@ -17,7 +18,7 @@ export default function AdminDashboard() {
   const [newBook, setNewBook] = useState({ titre: '', auteur: '', isbn: '', editeur: '', annee_publication: '', categorie: '', langue: 'Francais', nombre_pages: '', description: '', couverture_url: '', emplacement: '', nombre_exemplaires: 1 });
   const [newAdmin, setNewAdmin] = useState({ nom: '', prenom: '', email: '', password: '', role: 'admin' }); const [generatedQr, setGeneratedQr] = useState(null);
   function showToast(msg, type = 'info') { setToastType(type); setToast(msg); setTimeout(() => setToast(''), 4500); }
-  useEffect(() => { fetch('/api/auth/admin-me').then(r => r.json()).then(d => { if (!d.admin) { router.push('/admin/connexion'); return; } setAdmin(d.admin); loadAll(); }); }, []);
+  useEffect(() => { fetch('/api/auth/admin-me').then(r => r.json()).then(d => { if (!d.admin) { router.push('/admin/connexion'); return; } setAdmin(d.admin); loadAll(); fetch('/api/admin/check-overdue', { method: 'POST' }).catch(() => {}); }); }, []);
   function loadAll() {
     fetch('/api/admin/stats').then(r => r.json()).then(setStats).catch(() => {});
     fetch('/api/books').then(r => r.json()).then(d => setBooks(d.books || [])).catch(() => {});
@@ -45,6 +46,7 @@ export default function AdminDashboard() {
         <aside className="admin-sidebar">
           <div className="admin-sidebar-brand"><Icon name="book" size={20} /> Catalogue+ <span>Admin</span></div>
           <p className="admin-sidebar-user">{admin.prenom} {admin.nom}<br /><small>{admin.role}</small></p>
+          <NotificationBell scope="admin" />
           <nav>{TABS.map(t => <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}><Icon name={t.icon} size={16} /> <span>{t.label}</span></button>)}</nav>
           <button className="admin-logout-btn" onClick={handleLogout}><Icon name="log-out" size={16} /> <span>Deconnexion</span></button>
         </aside>
