@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import Toast from '../../components/Toast';
@@ -9,7 +8,9 @@ import NotificationBell from '../../components/NotificationBell';
 import PushNotificationSetup from '../../components/PushNotificationSetup';
 import AnimatedButton from '../../components/animations/AnimatedButton';
 
+
 const TABS = [{ id: 'stats', label: 'Statistiques', icon: 'bar-chart' },{ id: 'livres', label: 'Livres', icon: 'book' },{ id: 'emprunts', label: "Demandes d'emprunt", icon: 'mail' },{ id: 'historique', label: 'Historique', icon: 'clock' },{ id: 'admins', label: 'Administrateurs', icon: 'user' },{ id: 'export', label: 'Exports', icon: 'download' }];
+
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -61,7 +62,6 @@ export default function AdminDashboard() {
           <p className="admin-sidebar-user">{admin.prenom} {admin.nom}<br /><small>{admin.role}</small></p>
           <NotificationBell scope="admin" />
           <nav>{TABS.map(t => <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}><Icon name={t.icon} size={16} /> <span>{t.label}</span></button>)}</nav>
-          <Link href="/" className="admin-view-site-btn"><Icon name="globe" size={16} /> <span>Voir le site</span></Link>
           <button className="admin-logout-btn" onClick={handleLogout}><Icon name="log-out" size={16} /> <span>Deconnexion</span></button>
         </aside>
         <main className="admin-main">
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
                 <h1>Demandes d'emprunt en attente</h1>
                 {pendingLoans.length === 0 ? <p className="loading-text">Aucune demande en attente.</p> : (
                   <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Etudiant</th><th>Livre</th><th>Duree</th><th>Date demande</th><th>Actions</th></tr></thead>
-                    <tbody>{pendingLoans.map(l => (<tr key={l.id}><td>{l.user_prenom} {l.user_nom}<br /><small>{l.user_email}</small></td><td>{l.livre_titre}</td><td>{l.duree_jours} jours</td><td>{new Date(l.date_demande).toLocaleDateString('fr-FR')}</td><td><button className="btn-small btn-small-success" onClick={() => handleValidateLoan(l.id)}>Valider</button><button className="btn-small btn-small-danger" onClick={() => setRejectingLoan(l.id)}>Refuser</button></td></tr>))}</tbody>
+                    <tbody>{pendingLoans.map(l => (<tr key={l.id}><td>{l.user_prenom} {l.user_nom}<br /><small>{l.user_email}</small>{l.user_numero && <><br /><a href={'tel:' + l.user_numero} className="phone-link">{l.user_numero}</a></>}</td><td>{l.livre_titre}</td><td>{l.duree_jours} jours</td><td>{new Date(l.date_demande).toLocaleDateString('fr-FR')}</td><td><button className="btn-small btn-small-success" onClick={() => handleValidateLoan(l.id)}>Valider</button><button className="btn-small btn-small-danger" onClick={() => setRejectingLoan(l.id)}>Refuser</button></td></tr>))}</tbody>
                   </table></div>
                 )}
               </motion.div>
@@ -104,8 +104,8 @@ export default function AdminDashboard() {
             {tab === 'historique' && (
               <motion.div key="historique" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <h1>Historique complet des emprunts</h1>
-                <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Etudiant</th><th>Livre</th><th>Statut</th><th>Demande</th><th>Retour prevu</th></tr></thead>
-                  <tbody>{allLoans.map(l => (<tr key={l.id}><td>{l.user_prenom} {l.user_nom}</td><td>{l.livre_titre}</td><td>{l.statut}</td><td>{new Date(l.date_demande).toLocaleDateString('fr-FR')}</td><td>{l.date_retour_prevue ? new Date(l.date_retour_prevue).toLocaleDateString('fr-FR') : '-'}</td></tr>))}</tbody>
+                <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Etudiant</th><th>Telephone</th><th>Livre</th><th>Statut</th><th>Demande</th><th>Retour prevu</th></tr></thead>
+                  <tbody>{allLoans.map(l => (<tr key={l.id}><td>{l.user_prenom} {l.user_nom}</td><td>{l.user_numero ? <a href={'tel:' + l.user_numero} className="phone-link">{l.user_numero}</a> : '-'}</td><td>{l.livre_titre}</td><td>{l.statut}</td><td>{new Date(l.date_demande).toLocaleDateString('fr-FR')}</td><td>{l.date_retour_prevue ? new Date(l.date_retour_prevue).toLocaleDateString('fr-FR') : '-'}</td></tr>))}</tbody>
                 </table></div>
               </motion.div>
             )}

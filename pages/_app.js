@@ -11,6 +11,7 @@ import '../styles/footer-admin-link.css';
 import '../styles/admin-view-site-button.css';
 import '../styles/admin-mobile-complete.css';
 import '../styles/notif-final-fix.css';
+import '../styles/phone-link.css';
 import { useEffect } from 'react';
 export default function App({ Component, pageProps }) {
   useEffect(() => {
