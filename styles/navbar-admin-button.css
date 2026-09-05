@@ -1,0 +1,22 @@
+.btn-nav-admin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--secondary);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.btn-nav-admin:hover { background: var(--primary); }
+[data-theme="dark"] .btn-nav-admin { background: #2a2f3a; }
+[data-theme="dark"] .btn-nav-admin:hover { background: var(--primary); }
+
+.navbar-mobile-admin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--primary);
+  font-weight: 700;
+}
