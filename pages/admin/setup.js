@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import Toast from '../../components/Toast';
 import Icon from '../../components/Icon';
+import PasswordInput from '../../components/PasswordInput';
 import AnimatedButton from '../../components/animations/AnimatedButton';
 export default function AdminSetup() {
   const router = useRouter();
@@ -24,8 +25,8 @@ export default function AdminSetup() {
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-row"><div><label>Nom</label><input required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} /></div><div><label>Prenom</label><input required value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} /></div></div>
             <label>Email</label><input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            <label>Mot de passe</label><input type="password" required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-            <label>Code de configuration</label><input type="password" required value={form.setupCode} onChange={(e) => setForm({ ...form, setupCode: e.target.value })} placeholder="ADMIN_SETUP_CODE" />
+            <label>Mot de passe</label><PasswordInput required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+            <label>Code de configuration</label><PasswordInput required value={form.setupCode} onChange={(e) => setForm({ ...form, setupCode: e.target.value })} placeholder="ADMIN_SETUP_CODE" />
             <AnimatedButton type="submit" className="btn-primary btn-full" disabled={loading}>{loading ? 'Creation...' : 'Creer le super-admin'}</AnimatedButton>
           </form>
         </motion.div>

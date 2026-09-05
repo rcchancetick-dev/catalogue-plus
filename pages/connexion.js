@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Toast from '../components/Toast';
+import PasswordInput from '../components/PasswordInput';
 import AnimatedButton from '../components/animations/AnimatedButton';
 export default function Connexion() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function Connexion() {
             {mode === 'login' ? (
               <motion.form key="login" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} onSubmit={handleLogin} className="auth-form">
                 <label>Email</label><input type="email" required value={loginForm.email} onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} />
-                <label>Mot de passe</label><input type="password" required value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} />
+                <label>Mot de passe</label><PasswordInput required value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} />
                 <AnimatedButton type="submit" className="btn-primary btn-full" disabled={loading}>{loading ? 'Connexion...' : 'Se connecter'}</AnimatedButton>
               </motion.form>
             ) : (
@@ -45,8 +46,8 @@ export default function Connexion() {
                 <label>Etablissement</label><input value={regForm.etablissement} onChange={(e) => setRegForm({ ...regForm, etablissement: e.target.value })} placeholder="Ex: ESPA Antsiranana" />
                 <div className="form-row"><div className="checkbox-row"><input type="checkbox" checked={regForm.is_etudiant} onChange={(e) => setRegForm({ ...regForm, is_etudiant: e.target.checked })} id="is_etudiant" /><label htmlFor="is_etudiant">Je suis etudiant(e)</label></div></div>
                 {regForm.is_etudiant && (<><label>Niveau d'etudes</label><input value={regForm.niveau} onChange={(e) => setRegForm({ ...regForm, niveau: e.target.value })} placeholder="Ex: Licence 2" /></>)}
-                <label>Mot de passe</label><input type="password" required minLength={8} value={regForm.password} onChange={(e) => setRegForm({ ...regForm, password: e.target.value })} />
-                <label>Confirmer le mot de passe</label><input type="password" required minLength={8} value={regForm.confirmPassword} onChange={(e) => setRegForm({ ...regForm, confirmPassword: e.target.value })} />
+                <label>Mot de passe</label><PasswordInput required minLength={8} value={regForm.password} onChange={(e) => setRegForm({ ...regForm, password: e.target.value })} />
+                <label>Confirmer le mot de passe</label><PasswordInput required minLength={8} value={regForm.confirmPassword} onChange={(e) => setRegForm({ ...regForm, confirmPassword: e.target.value })} />
                 <AnimatedButton type="submit" className="btn-primary btn-full" disabled={loading}>{loading ? 'Inscription...' : "S'inscrire"}</AnimatedButton>
               </motion.form>
             )}
