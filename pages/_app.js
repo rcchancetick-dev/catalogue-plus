@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '../styles/password-field.css';
 import { useEffect } from 'react';
 export default function App({ Component, pageProps }) {
   useEffect(() => { if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {})); }, []);
