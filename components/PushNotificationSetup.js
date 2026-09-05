@@ -38,6 +38,7 @@ export default function PushNotificationSetup() {
       });
       await fetch('/api/notifications/subscribe', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subscription })
       });

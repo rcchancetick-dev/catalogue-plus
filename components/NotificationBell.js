@@ -25,21 +25,21 @@ export default function NotificationBell({ scope }) {
 
   async function load() {
     try {
-      const res = await fetch('/api/notifications');
-      if (!res.ok) return;
+      const res = await fetch('/api/notifications', { credentials: 'include', cache: 'no-store' });
+      if (!res.ok) { console.warn('Notifications: reponse non-ok', res.status); return; }
       const data = await res.json();
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
-    } catch (e) {}
+    } catch (e) { console.error('Erreur chargement notifications:', e); }
   }
 
   async function markAsRead(id) {
-    await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    await fetch('/api/notifications', { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     load();
   }
 
   async function markAllRead() {
-    await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ markAll: true }) });
+    await fetch('/api/notifications', { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ markAll: true }) });
     load();
   }
 

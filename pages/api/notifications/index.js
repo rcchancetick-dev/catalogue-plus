@@ -1,9 +1,10 @@
 import sql from '../../../lib/db';
-import { getUserFromReq, getAdminFromReq } from '../../../lib/auth';
+import { getUserFromReq } from '../../../lib/auth';
+import { getActiveAdminFromReq } from '../../../lib/adminGuard';
 
 export default async function handler(req, res) {
   const user = getUserFromReq(req);
-  const admin = getAdminFromReq(req);
+  const admin = await getActiveAdminFromReq(req);
   const recipientType = admin ? 'admin' : (user ? 'user' : null);
   const recipientId = admin ? admin.id : (user ? user.id : null);
   if (!recipientType) return res.status(401).json({ error: 'Non autorise.' });
