@@ -20,12 +20,22 @@ async function init() {
     is_read BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW()
   );`;
+  await sql`CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id SERIAL PRIMARY KEY,
+    recipient_type VARCHAR(10) NOT NULL,
+    recipient_id INTEGER NOT NULL,
+    endpoint TEXT UNIQUE NOT NULL,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+  );`;
   await sql`CREATE INDEX IF NOT EXISTS idx_books_uid ON books(uid);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_loans_status ON loans(statut);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_loans_user ON loans(user_id);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_loans_book ON loans(book_id);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_notif_recipient ON notifications(recipient_type, recipient_id, is_read);`;
-  console.log('Tables creees (incluant notifications).');
+  await sql`CREATE INDEX IF NOT EXISTS idx_push_sub_recipient ON push_subscriptions(recipient_type, recipient_id);`;
+  console.log('Tables creees (incluant notifications et push_subscriptions).');
 }
 init().catch((e) => { console.error(e); process.exit(1); });
