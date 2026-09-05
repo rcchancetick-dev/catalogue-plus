@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,9 +18,15 @@ export default function AdminDashboard() {
   const [rejectingLoan, setRejectingLoan] = useState(null); const [motif, setMotif] = useState('');
   const [newBook, setNewBook] = useState({ titre: '', auteur: '', isbn: '', editeur: '', annee_publication: '', categorie: '', langue: 'Francais', nombre_pages: '', description: '', couverture_url: '', emplacement: '', nombre_exemplaires: 1 });
   const [newAdmin, setNewAdmin] = useState({ nom: '', prenom: '', email: '', password: '', role: 'admin' }); const [generatedQr, setGeneratedQr] = useState(null);
+  const modalOpenRef = useRef(false);
+  useEffect(() => { modalOpenRef.current = showAddBook || showAddAdmin || !!rejectingLoan || !!generatedQr; }, [showAddBook, showAddAdmin, rejectingLoan, generatedQr]);
   function showToast(msg, type = 'info') { setToastType(type); setToast(msg); setTimeout(() => setToast(''), 4500); }
-  useEffect(() => { fetch('/api/auth/admin-me').then(r => r.json()).then(d => { if (!d.admin) { router.push('/admin/connexion'); return; } setAdmin(d.admin); loadAll(); fetch('/api/admin/check-overdue', { method: 'POST' }).catch(() => {}); }); }, []);
-  function loadAll() {
+  useEffect(() => {
+    fetch('/api/auth/admin-me').then(r => r.json()).then(d => { if (!d.admin) { router.push('/admin/connexion'); return; } setAdmin(d.admin); loadAll(); fetch('/api/admin/check-overdue', { method: 'POST' }).catch(() => {}); });
+    const interval = setInterval(() => { if (!modalOpenRef.current) loadAll(true); }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+  function loadAll(silent = false) {
     fetch('/api/admin/stats').then(r => r.json()).then(setStats).catch(() => {});
     fetch('/api/books').then(r => r.json()).then(d => setBooks(d.books || [])).catch(() => {});
     fetch('/api/loans?statut=en_attente').then(r => r.json()).then(d => setPendingLoans(d.loans || [])).catch(() => {});
