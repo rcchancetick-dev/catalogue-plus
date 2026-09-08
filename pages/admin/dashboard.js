@@ -12,6 +12,7 @@ import AnimatedButton from '../../components/animations/AnimatedButton';
 
 const TABS = [{ id: 'stats', label: 'Statistiques', icon: 'bar-chart' },{ id: 'livres', label: 'Livres', icon: 'book' },{ id: 'emprunts', label: "Demandes d'emprunt", icon: 'mail' },{ id: 'historique', label: 'Historique', icon: 'clock' },{ id: 'admins', label: 'Administrateurs', icon: 'user' },{ id: 'export', label: 'Exports', icon: 'download' }];
 
+const EMPTY_BOOK = { titre: '', auteur: '', isbn: '', editeur: '', annee_publication: '', categorie: '', langue: 'Francais', nombre_pages: '', description: '', couverture_url: '', emplacement: '', nombre_exemplaires: 1 };
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -20,10 +21,11 @@ export default function AdminDashboard() {
   const [toast, setToast] = useState(''); const [toastType, setToastType] = useState('info'); const [showAddBook, setShowAddBook] = useState(false); const [showAddAdmin, setShowAddAdmin] = useState(false);
   const [rejectingLoan, setRejectingLoan] = useState(null); const [motif, setMotif] = useState('');
   const [confirmingToggle, setConfirmingToggle] = useState(null);
-  const [newBook, setNewBook] = useState({ titre: '', auteur: '', isbn: '', editeur: '', annee_publication: '', categorie: '', langue: 'Francais', nombre_pages: '', description: '', couverture_url: '', emplacement: '', nombre_exemplaires: 1 });
+  const [editingBook, setEditingBook] = useState(null);
+  const [newBook, setNewBook] = useState(EMPTY_BOOK);
   const [newAdmin, setNewAdmin] = useState({ nom: '', prenom: '', email: '', password: '', role: 'admin' }); const [generatedQr, setGeneratedQr] = useState(null);
   const modalOpenRef = useRef(false);
-  useEffect(() => { modalOpenRef.current = showAddBook || showAddAdmin || !!rejectingLoan || !!generatedQr || !!confirmingToggle; }, [showAddBook, showAddAdmin, rejectingLoan, generatedQr, confirmingToggle]);
+  useEffect(() => { modalOpenRef.current = showAddBook || showAddAdmin || !!rejectingLoan || !!generatedQr || !!confirmingToggle || !!editingBook; }, [showAddBook, showAddAdmin, rejectingLoan, generatedQr, confirmingToggle, editingBook]);
   function showToast(msg, type = 'info') { setToastType(type); setToast(msg); setTimeout(() => setToast(''), 4500); }
   useEffect(() => {
     fetch('/api/auth/admin-me').then(r => r.json()).then(d => { if (!d.admin) { router.push('/admin/connexion'); return; } setAdmin(d.admin); loadAll(); fetch('/api/admin/check-overdue', { method: 'POST' }).catch(() => {}); });
@@ -40,7 +42,28 @@ export default function AdminDashboard() {
   async function handleLogout() { await fetch('/api/auth/admin-logout', { method: 'POST' }); router.push('/admin/connexion'); }
   async function handleAddBook(e) {
     e.preventDefault();
-    try { const res = await fetch('/api/books', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newBook) }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); setGeneratedQr({ qr: data.book.qr_code_data, titre: data.book.titre, url: data.qrUrl }); setShowAddBook(false); setNewBook({ titre: '', auteur: '', isbn: '', editeur: '', annee_publication: '', categorie: '', langue: 'Francais', nombre_pages: '', description: '', couverture_url: '', emplacement: '', nombre_exemplaires: 1 }); loadAll(); } catch (err) { showToast(err.message, 'error'); }
+    try { const res = await fetch('/api/books', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newBook) }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); setGeneratedQr({ qr: data.book.qr_code_data, titre: data.book.titre, url: data.qrUrl }); setShowAddBook(false); setNewBook(EMPTY_BOOK); loadAll(); } catch (err) { showToast(err.message, 'error'); }
+  }
+  function openEditBook(b) {
+    setEditingBook({
+      uid: b.uid,
+      titre: b.titre || '', auteur: b.auteur || '', isbn: b.isbn || '', editeur: b.editeur || '',
+      annee_publication: b.annee_publication || '', categorie: b.categorie || '', langue: b.langue || 'Francais',
+      nombre_pages: b.nombre_pages || '', description: b.description || '', couverture_url: b.couverture_url || '',
+      emplacement: b.emplacement || '', nombre_exemplaires: b.nombre_exemplaires || 1
+    });
+  }
+  async function handleEditBook(e) {
+    e.preventDefault();
+    try {
+      const { uid, ...payload } = editingBook;
+      const res = await fetch('/api/books/' + uid, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast(data.message || 'Livre mis a jour.', 'success');
+      setEditingBook(null);
+      loadAll();
+    } catch (err) { showToast(err.message, 'error'); }
   }
   async function handleValidateLoan(id) { try { const res = await fetch('/api/loans/validate/' + id, { method: 'POST' }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); loadAll(); } catch (err) { showToast(err.message, 'error'); } }
   async function handleRejectLoan(id) { try { const res = await fetch('/api/loans/reject/' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ motif }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error); showToast(data.message, 'success'); setRejectingLoan(null); setMotif(''); loadAll(); } catch (err) { showToast(err.message, 'error'); } }
@@ -89,7 +112,7 @@ export default function AdminDashboard() {
               <motion.div key="livres" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div className="admin-section-header"><h1>Gestion des livres</h1><AnimatedButton className="btn-primary" onClick={() => setShowAddBook(true)}>+ Ajouter un livre</AnimatedButton></div>
                 <div className="admin-table-wrapper"><table className="admin-table"><thead><tr><th>Titre</th><th>Auteur</th><th>Categorie</th><th>Dispo</th><th>Statut</th><th>Actions</th></tr></thead>
-                  <tbody>{books.map(b => (<tr key={b.id}><td>{b.titre}</td><td>{b.auteur}</td><td>{b.categorie || '-'}</td><td>{b.exemplaires_disponibles}/{b.nombre_exemplaires}</td><td><span className={'status-badge ' + (b.statut === 'disponible' ? 'status-active' : 'status-pending')}>{b.statut}</span></td><td><button className="btn-small" onClick={() => setGeneratedQr({ qr: b.qr_code_data, titre: b.titre, url: (process.env.NEXT_PUBLIC_SITE_URL || '') + '/livre/' + b.uid })}><Icon name="qr-code" size={13} /> QR</button>{b.exemplaires_disponibles < b.nombre_exemplaires && <button className="btn-small btn-small-success" onClick={() => handleMarkReturned(b.uid)}>Marquer rendu</button>}</td></tr>))}</tbody>
+                  <tbody>{books.map(b => (<tr key={b.id}><td>{b.titre}</td><td>{b.auteur}</td><td>{b.categorie || '-'}</td><td>{b.exemplaires_disponibles}/{b.nombre_exemplaires}</td><td><span className={'status-badge ' + (b.statut === 'disponible' ? 'status-active' : 'status-pending')}>{b.statut}</span></td><td><button className="btn-small" onClick={() => openEditBook(b)}><Icon name="edit" size={13} /> Modifier</button><button className="btn-small" onClick={() => setGeneratedQr({ qr: b.qr_code_data, titre: b.titre, url: (process.env.NEXT_PUBLIC_SITE_URL || '') + '/livre/' + b.uid })}><Icon name="qr-code" size={13} /> QR</button>{b.exemplaires_disponibles < b.nombre_exemplaires && <button className="btn-small btn-small-success" onClick={() => handleMarkReturned(b.uid)}>Marquer rendu</button>}</td></tr>))}</tbody>
                 </table></div>
               </motion.div>
             )}
@@ -146,6 +169,23 @@ export default function AdminDashboard() {
                 <label>URL couverture (optionnel)</label><input value={newBook.couverture_url} onChange={(e) => setNewBook({ ...newBook, couverture_url: e.target.value })} />
                 <label>Description</label><textarea rows={3} value={newBook.description} onChange={(e) => setNewBook({ ...newBook, description: e.target.value })} />
                 <div className="modal-actions"><button type="button" className="btn-secondary" onClick={() => setShowAddBook(false)}>Annuler</button><AnimatedButton type="submit" className="btn-primary">Enregistrer et generer le QR</AnimatedButton></div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+        {editingBook && (
+          <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingBook(null)}>
+            <motion.div className="modal-content" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()}>
+              <h2>Modifier le livre</h2>
+              <form onSubmit={handleEditBook} className="auth-form">
+                <div className="form-row"><div><label>Titre *</label><input required value={editingBook.titre} onChange={(e) => setEditingBook({ ...editingBook, titre: e.target.value })} /></div><div><label>Auteur *</label><input required value={editingBook.auteur} onChange={(e) => setEditingBook({ ...editingBook, auteur: e.target.value })} /></div></div>
+                <div className="form-row"><div><label>ISBN</label><input value={editingBook.isbn} onChange={(e) => setEditingBook({ ...editingBook, isbn: e.target.value })} /></div><div><label>Editeur</label><input value={editingBook.editeur} onChange={(e) => setEditingBook({ ...editingBook, editeur: e.target.value })} /></div></div>
+                <div className="form-row"><div><label>Annee</label><input type="number" value={editingBook.annee_publication} onChange={(e) => setEditingBook({ ...editingBook, annee_publication: e.target.value })} /></div><div><label>Categorie</label><input value={editingBook.categorie} onChange={(e) => setEditingBook({ ...editingBook, categorie: e.target.value })} /></div></div>
+                <div className="form-row"><div><label>Nb pages</label><input type="number" value={editingBook.nombre_pages} onChange={(e) => setEditingBook({ ...editingBook, nombre_pages: e.target.value })} /></div><div><label>Nb exemplaires</label><input type="number" min={1} value={editingBook.nombre_exemplaires} onChange={(e) => setEditingBook({ ...editingBook, nombre_exemplaires: e.target.value })} /></div></div>
+                <label>Emplacement</label><input value={editingBook.emplacement} onChange={(e) => setEditingBook({ ...editingBook, emplacement: e.target.value })} placeholder="Ex: Rayon A - Etagere 2" />
+                <label>URL couverture (optionnel)</label><input value={editingBook.couverture_url} onChange={(e) => setEditingBook({ ...editingBook, couverture_url: e.target.value })} />
+                <label>Description</label><textarea rows={3} value={editingBook.description} onChange={(e) => setEditingBook({ ...editingBook, description: e.target.value })} />
+                <div className="modal-actions"><button type="button" className="btn-secondary" onClick={() => setEditingBook(null)}>Annuler</button><AnimatedButton type="submit" className="btn-primary">Enregistrer les modifications</AnimatedButton></div>
               </form>
             </motion.div>
           </motion.div>
