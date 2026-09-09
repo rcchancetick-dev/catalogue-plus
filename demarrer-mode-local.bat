@@ -24,35 +24,57 @@ echo   7. Aide et explications
 echo   8. Quitter
 echo.
 echo ============================================================
-set /p CHOIX="Ton choix (1 a 8) : "
+set "CHOIX="
+set /p CHOIX=Ton choix (1 a 8) : 
 
-if "%CHOIX%"=="1" goto :DEMARRER
-if "%CHOIX%"=="2" goto :AFFICHER_LIEN
-if "%CHOIX%"=="3" goto :VERIFIER
-if "%CHOIX%"=="4" goto :CONFIRM_INSTALLER
-if "%CHOIX%"=="5" goto :CONFIRM_METTRE_A_JOUR
-if "%CHOIX%"=="6" goto :TOUT_REFAIRE
-if "%CHOIX%"=="7" goto :AIDE
-if "%CHOIX%"=="8" exit /b 0
+if "%CHOIX%"=="1" goto DEMARRER
+if "%CHOIX%"=="2" goto AFFICHER_LIEN
+if "%CHOIX%"=="3" goto VERIFIER
+if "%CHOIX%"=="4" goto CONFIRM_INSTALLER
+if "%CHOIX%"=="5" goto CONFIRM_METTRE_A_JOUR
+if "%CHOIX%"=="6" goto CONFIRM_TOUT_REFAIRE
+if "%CHOIX%"=="7" goto AIDE
+if "%CHOIX%"=="8" goto FIN
+
 echo.
 echo Choix non reconnu, reessaie avec un numero entre 1 et 8.
 pause
-goto :MENU
+goto MENU
+
+:FIN
+endlocal
+exit /b 0
+
+REM ============================================================
+REM  Utilitaire : verifier si le projet est present.
+REM  Renvoie ERRORLEVEL 0 si trouve (et se place dedans),
+REM  ERRORLEVEL 1 sinon.
+REM ============================================================
+:VERIF_PROJET_PRESENT
+if exist "package.json" (
+    if exist "pages" (
+        exit /b 0
+    )
+)
+if exist "%PROJECT_DIR%\package.json" (
+    cd /d "%PROJECT_DIR%"
+    exit /b 0
+)
+exit /b 1
 
 REM ============================================================
 REM  Utilitaire : se positionner dans le dossier du projet
 REM  (le telecharge automatiquement s'il est absent)
+REM  Renvoie ERRORLEVEL 0 en cas de succes, 1 en cas d'echec.
 REM ============================================================
 :ALLER_DANS_PROJET
-if exist "package.json" if exist "pages" (
+call :VERIF_PROJET_PRESENT
+if %ERRORLEVEL% EQU 0 (
     exit /b 0
 )
-if exist "%PROJECT_DIR%\package.json" (
-    cd "%PROJECT_DIR%"
-    exit /b 0
-)
+
 where git >nul 2>nul
-if %errorlevel% neq 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [ERREUR] Le programme "Git" n'est pas installe, il est indispensable
     echo          pour telecharger le site. Choisis l'option 4 du menu
@@ -61,12 +83,13 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
+
 echo.
 echo [INFO] Le site n'est pas encore present sur cet ordinateur.
 echo        Telechargement en cours, merci de patienter...
 echo.
 git clone "%REPO_URL%" "%PROJECT_DIR%"
-if %errorlevel% neq 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [ERREUR] Le telechargement a echoue. Verifie ta connexion Internet
     echo          et reessaie.
@@ -74,7 +97,7 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-cd "%PROJECT_DIR%"
+cd /d "%PROJECT_DIR%"
 echo.
 echo [OK] Site telecharge avec succes.
 echo.
@@ -91,16 +114,16 @@ echo ============================================================
 echo.
 
 where node >nul 2>nul
-if %errorlevel% neq 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo [ERREUR] Un composant necessaire ("Node.js") n'est pas installe.
     echo          Retourne au menu et choisis l'option 4 pour l'installer.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
 
 call :ALLER_DANS_PROJET
-if %errorlevel% neq 0 goto :MENU
+if %ERRORLEVEL% NEQ 0 goto MENU
 
 if not exist "node_modules" (
     echo [INFO] Premiere utilisation : installation des composants du site...
@@ -109,10 +132,12 @@ if not exist "node_modules" (
     call npm install
     echo.
 )
-if exist "offline-server\package.json" if not exist "offline-server\node_modules" (
-    pushd offline-server
-    call npm install
-    popd
+if exist "offline-server\package.json" (
+    if not exist "offline-server\node_modules" (
+        pushd offline-server
+        call npm install
+        popd
+    )
 )
 
 echo ============================================================
@@ -137,8 +162,9 @@ echo Pour arreter le site : appuie sur Ctrl+C, ou ferme cette fenetre.
 echo.
 
 if exist "offline-server\server.js" (
-    cd offline-server
+    pushd offline-server
     node server.js
+    popd
 ) else (
     call npm run offline
 )
@@ -146,7 +172,7 @@ if exist "offline-server\server.js" (
 echo.
 echo Le site s'est arrete.
 pause
-goto :MENU
+goto MENU
 
 REM ============================================================
 REM  2. AFFICHER LE LIEN DE CONNEXION SANS DEMARRER LE SITE
@@ -174,7 +200,7 @@ echo Rappel : le site doit etre demarre (option 1 du menu) pour que
 echo ce lien fonctionne reellement.
 echo.
 pause
-goto :MENU
+goto MENU
 
 REM ============================================================
 REM  3. VERIFIER L'INSTALLATION  (sans risque, aucune confirmation)
@@ -189,7 +215,7 @@ echo.
 set "TOUT_OK=1"
 
 where node >nul 2>nul
-if %errorlevel% equ 0 (
+if %ERRORLEVEL% EQU 0 (
     echo [OK]     Node.js est installe.
 ) else (
     echo [MANQUE] Node.js n'est pas installe.
@@ -197,33 +223,39 @@ if %errorlevel% equ 0 (
 )
 
 where git >nul 2>nul
-if %errorlevel% equ 0 (
+if %ERRORLEVEL% EQU 0 (
     echo [OK]     Git est installe.
 ) else (
     echo [MANQUE] Git n'est pas installe.
     set "TOUT_OK=0"
 )
 
-if exist "package.json" if exist "pages" (
-    echo [OK]     Le dossier du site est present ici.
-) else (
-    if exist "%PROJECT_DIR%\package.json" (
-        echo [OK]     Le dossier du site est present (dans "%PROJECT_DIR%").
-    ) else (
-        echo [MANQUE] Le dossier du site n'est pas encore telecharge.
-        set "TOUT_OK=0"
+set "PROJET_PRESENT=0"
+if exist "package.json" (
+    if exist "pages" (
+        set "PROJET_PRESENT=1"
     )
 )
+if "%PROJET_PRESENT%"=="0" (
+    if exist "%PROJECT_DIR%\package.json" (
+        set "PROJET_PRESENT=1"
+    )
+)
+if "%PROJET_PRESENT%"=="1" (
+    echo [OK]     Le dossier du site est present.
+) else (
+    echo [MANQUE] Le dossier du site n'est pas encore telecharge.
+    set "TOUT_OK=0"
+)
 
-if exist "node_modules" (
+set "COMPOSANTS_PRESENTS=0"
+if exist "node_modules" set "COMPOSANTS_PRESENTS=1"
+if exist "%PROJECT_DIR%\node_modules" set "COMPOSANTS_PRESENTS=1"
+if "%COMPOSANTS_PRESENTS%"=="1" (
     echo [OK]     Les composants du site sont installes.
 ) else (
-    if exist "%PROJECT_DIR%\node_modules" (
-        echo [OK]     Les composants du site sont installes.
-    ) else (
-        echo [MANQUE] Les composants du site ne sont pas encore installes.
-        set "TOUT_OK=0"
-    )
+    echo [MANQUE] Les composants du site ne sont pas encore installes.
+    set "TOUT_OK=0"
 )
 
 echo.
@@ -235,12 +267,11 @@ if "%TOUT_OK%"=="1" (
 )
 echo.
 pause
-goto :MENU
+goto MENU
 
 REM ============================================================
 REM  4. INSTALLER OU REPARER LES COMPOSANTS
 REM     RISQUE : peut ecraser/reinstaller des composants existants
-REM     -> confirmation demandee avant de lancer
 REM ============================================================
 :CONFIRM_INSTALLER
 cls
@@ -252,17 +283,16 @@ echo Cette option va verifier et reinstaller au besoin les composants
 echo du site (cela peut modifier des fichiers techniques existants,
 echo mais ne touche jamais aux livres ni aux emprunts enregistres).
 echo.
-set /p CONFIRME="Veux-tu continuer ? (oui / non) : "
+set "CONFIRME="
+set /p CONFIRME=Veux-tu continuer ? (oui / non) : 
 if /i not "%CONFIRME%"=="oui" (
     echo.
     echo Operation annulee, aucun changement effectue.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
-goto :INSTALLER
 
-:INSTALLER
 cls
 echo ============================================================
 echo   INSTALLATION / REPARATION DES COMPOSANTS
@@ -270,7 +300,7 @@ echo ============================================================
 echo.
 
 where node >nul 2>nul
-if %errorlevel% neq 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo [ETAPE 1] Node.js n'est pas installe. Il est indispensable.
     echo.
     echo   1. Va sur https://nodejs.org
@@ -279,13 +309,13 @@ if %errorlevel% neq 0 (
     echo   4. Reviens ensuite dans ce menu et choisis a nouveau l'option 4.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
 echo [OK] Node.js est installe.
 echo.
 
 where git >nul 2>nul
-if %errorlevel% neq 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo [ETAPE 2] Git n'est pas installe. Il est indispensable pour
     echo           telecharger et mettre a jour le site.
     echo.
@@ -295,13 +325,13 @@ if %errorlevel% neq 0 (
     echo   3. Reviens ensuite dans ce menu et choisis a nouveau l'option 4.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
 echo [OK] Git est installe.
 echo.
 
 call :ALLER_DANS_PROJET
-if %errorlevel% neq 0 goto :MENU
+if %ERRORLEVEL% NEQ 0 goto MENU
 
 echo [ETAPE 3] Installation des composants du site...
 echo           (peut prendre quelques minutes)
@@ -317,12 +347,11 @@ echo.
 echo [OK] Tout est installe. Tu peux demarrer le site avec l'option 1.
 echo.
 pause
-goto :MENU
+goto MENU
 
 REM ============================================================
 REM  5. METTRE A JOUR LE SITE
 REM     RISQUE : peut ecraser des modifications locales non enregistrees
-REM     -> confirmation demandee avant de lancer
 REM ============================================================
 :CONFIRM_METTRE_A_JOUR
 cls
@@ -334,17 +363,16 @@ echo Cette option va recuperer la derniere version du site depuis
 echo Internet. Si des fichiers ont ete modifies manuellement sur cet
 echo ordinateur, ils pourraient etre affectes par la mise a jour.
 echo.
-set /p CONFIRME="Veux-tu continuer ? (oui / non) : "
+set "CONFIRME="
+set /p CONFIRME=Veux-tu continuer ? (oui / non) : 
 if /i not "%CONFIRME%"=="oui" (
     echo.
     echo Operation annulee, aucun changement effectue.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
-goto :METTRE_A_JOUR
 
-:METTRE_A_JOUR
 cls
 echo ============================================================
 echo   MISE A JOUR DU SITE
@@ -352,15 +380,15 @@ echo ============================================================
 echo.
 
 call :ALLER_DANS_PROJET
-if %errorlevel% neq 0 goto :MENU
+if %ERRORLEVEL% NEQ 0 goto MENU
 
 where git >nul 2>nul
-if %errorlevel% neq 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo [ERREUR] Git n'est pas installe, impossible de verifier les mises
     echo          a jour. Utilise l'option 4 du menu pour l'installer.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
 
 if not exist ".git" (
@@ -368,18 +396,18 @@ if not exist ".git" (
     echo          automatique n'est pas possible ici.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
 
 echo Recuperation de la derniere version depuis Internet...
 echo.
 git pull
-if %errorlevel% neq 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [ATTENTION] La mise a jour a echoue. Verifie ta connexion Internet.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
 
 echo.
@@ -395,14 +423,13 @@ echo.
 echo [OK] Le site est maintenant a jour.
 echo.
 pause
-goto :MENU
+goto MENU
 
 REM ============================================================
 REM  6. TOUT REINSTALLER DEPUIS ZERO
 REM     RISQUE ELEVE : supprime le dossier et les donnees locales
-REM     -> confirmation deja en place, conservee telle quelle
 REM ============================================================
-:TOUT_REFAIRE
+:CONFIRM_TOUT_REFAIRE
 cls
 echo ============================================================
 echo   REINSTALLATION COMPLETE DEPUIS ZERO
@@ -414,21 +441,22 @@ echo.
 echo Les livres, emprunts et comptes deja enregistres dans la base de
 echo donnees locale seront perdus si tu continues.
 echo.
-set /p CONFIRME="Es-tu bien sur de vouloir continuer ? (oui / non) : "
+set "CONFIRME="
+set /p CONFIRME=Es-tu bien sur de vouloir continuer ? (oui / non) : 
 if /i not "%CONFIRME%"=="oui" (
     echo.
     echo Operation annulee, aucun changement effectue.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
 
 where git >nul 2>nul
-if %errorlevel% neq 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo [ERREUR] Git n'est pas installe. Utilise l'option 4 du menu d'abord.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
 
 if exist "%PROJECT_DIR%" (
@@ -441,15 +469,15 @@ echo.
 echo Telechargement d'une version neuve du site...
 echo.
 git clone "%REPO_URL%" "%PROJECT_DIR%"
-if %errorlevel% neq 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [ERREUR] Le telechargement a echoue. Verifie ta connexion Internet.
     echo.
     pause
-    goto :MENU
+    goto MENU
 )
 
-cd "%PROJECT_DIR%"
+cd /d "%PROJECT_DIR%"
 echo.
 echo Installation des composants...
 call npm install
@@ -463,7 +491,7 @@ echo.
 echo [OK] Reinstallation terminee. Tu peux demarrer le site avec l'option 1.
 echo.
 pause
-goto :MENU
+goto MENU
 
 REM ============================================================
 REM  7. AIDE  (sans risque, aucune confirmation)
@@ -502,4 +530,4 @@ echo En cas de probleme persistant, contacte la personne qui a developpe
 echo le site en lui montrant le message d'erreur affiche a l'ecran.
 echo.
 pause
-goto :MENU
+goto MENU
