@@ -229,6 +229,27 @@ installer() {
     read -p "Appuie sur Entree pour revenir au menu..."
 }
 
+confirm_installer() {
+    clear
+    echo "============================================================"
+    echo "  INSTALLER OU REPARER LES COMPOSANTS"
+    echo "============================================================"
+    echo
+    echo "Cette option va verifier et reinstaller au besoin les composants"
+    echo "du site (cela peut modifier des fichiers techniques existants,"
+    echo "mais ne touche jamais aux livres ni aux emprunts enregistres)."
+    echo
+    read -p "Veux-tu continuer ? (oui / non) : " CONFIRME
+    if [ "$CONFIRME" != "oui" ]; then
+        echo
+        echo "Operation annulee, aucun changement effectue."
+        echo
+        read -p "Appuie sur Entree pour revenir au menu..."
+        return
+    fi
+    installer
+}
+
 mettre_a_jour() {
     clear
     echo "============================================================"
@@ -275,6 +296,27 @@ mettre_a_jour() {
     echo "[OK] Le site est maintenant a jour."
     echo
     read -p "Appuie sur Entree pour revenir au menu..."
+}
+
+confirm_mettre_a_jour() {
+    clear
+    echo "============================================================"
+    echo "  METTRE A JOUR LE SITE"
+    echo "============================================================"
+    echo
+    echo "Cette option va recuperer la derniere version du site depuis"
+    echo "Internet. Si des fichiers ont ete modifies manuellement sur cet"
+    echo "ordinateur, ils pourraient etre affectes par la mise a jour."
+    echo
+    read -p "Veux-tu continuer ? (oui / non) : " CONFIRME
+    if [ "$CONFIRME" != "oui" ]; then
+        echo
+        echo "Operation annulee, aucun changement effectue."
+        echo
+        read -p "Appuie sur Entree pour revenir au menu..."
+        return
+    fi
+    mettre_a_jour
 }
 
 tout_refaire() {
@@ -349,17 +391,22 @@ aide() {
     echo "  1. Demarrer le site        - a utiliser a chaque fois que tu veux"
     echo "                                que les etudiants puissent emprunter"
     echo "                                des livres depuis leur telephone."
+    echo "                                (aucun risque)"
     echo "  2. Afficher le lien        - montre l'adresse a taper sur un"
     echo "                                telephone, sans redemarrer le site."
+    echo "                                (aucun risque)"
     echo "  3. Verifier l'installation - controle que tout est pret, sans"
-    echo "                                rien modifier."
+    echo "                                rien modifier. (aucun risque)"
     echo "  4. Installer/reparer       - a utiliser si l'option 1 affiche une"
     echo "                                erreur, ou la toute premiere fois."
+    echo "                                (confirmation demandee)"
     echo "  5. Mettre a jour           - recupere les dernieres ameliorations"
     echo "                                du site depuis Internet."
+    echo "                                (confirmation demandee)"
     echo "  6. Tout refaire            - en dernier recours si plus rien ne"
-    echo "                                fonctionne. Attention, cela efface"
-    echo "                                les donnees locales deja enregistrees."
+    echo "                                fonctionne. Efface les donnees"
+    echo "                                locales deja enregistrees."
+    echo "                                (confirmation obligatoire)"
     echo
     echo "En cas de probleme persistant, contacte la personne qui a developpe"
     echo "le site en lui montrant le message d'erreur affiche a l'ecran."
@@ -391,8 +438,8 @@ while true; do
         1) demarrer ;;
         2) afficher_lien ;;
         3) verifier ;;
-        4) installer ;;
-        5) mettre_a_jour ;;
+        4) confirm_installer ;;
+        5) confirm_mettre_a_jour ;;
         6) tout_refaire ;;
         7) aide ;;
         8) exit 0 ;;
