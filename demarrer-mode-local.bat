@@ -29,8 +29,8 @@ set /p CHOIX="Ton choix (1 a 8) : "
 if "%CHOIX%"=="1" goto :DEMARRER
 if "%CHOIX%"=="2" goto :AFFICHER_LIEN
 if "%CHOIX%"=="3" goto :VERIFIER
-if "%CHOIX%"=="4" goto :INSTALLER
-if "%CHOIX%"=="5" goto :METTRE_A_JOUR
+if "%CHOIX%"=="4" goto :CONFIRM_INSTALLER
+if "%CHOIX%"=="5" goto :CONFIRM_METTRE_A_JOUR
 if "%CHOIX%"=="6" goto :TOUT_REFAIRE
 if "%CHOIX%"=="7" goto :AIDE
 if "%CHOIX%"=="8" exit /b 0
@@ -81,7 +81,7 @@ echo.
 exit /b 0
 
 REM ============================================================
-REM  1. DEMARRER LE SITE
+REM  1. DEMARRER LE SITE  (sans risque, aucune confirmation)
 REM ============================================================
 :DEMARRER
 cls
@@ -150,6 +150,7 @@ goto :MENU
 
 REM ============================================================
 REM  2. AFFICHER LE LIEN DE CONNEXION SANS DEMARRER LE SITE
+REM     (sans risque, aucune confirmation)
 REM ============================================================
 :AFFICHER_LIEN
 cls
@@ -176,7 +177,7 @@ pause
 goto :MENU
 
 REM ============================================================
-REM  3. VERIFIER L'INSTALLATION
+REM  3. VERIFIER L'INSTALLATION  (sans risque, aucune confirmation)
 REM ============================================================
 :VERIFIER
 cls
@@ -238,7 +239,29 @@ goto :MENU
 
 REM ============================================================
 REM  4. INSTALLER OU REPARER LES COMPOSANTS
+REM     RISQUE : peut ecraser/reinstaller des composants existants
+REM     -> confirmation demandee avant de lancer
 REM ============================================================
+:CONFIRM_INSTALLER
+cls
+echo ============================================================
+echo   INSTALLER OU REPARER LES COMPOSANTS
+echo ============================================================
+echo.
+echo Cette option va verifier et reinstaller au besoin les composants
+echo du site (cela peut modifier des fichiers techniques existants,
+echo mais ne touche jamais aux livres ni aux emprunts enregistres).
+echo.
+set /p CONFIRME="Veux-tu continuer ? (oui / non) : "
+if /i not "%CONFIRME%"=="oui" (
+    echo.
+    echo Operation annulee, aucun changement effectue.
+    echo.
+    pause
+    goto :MENU
+)
+goto :INSTALLER
+
 :INSTALLER
 cls
 echo ============================================================
@@ -298,7 +321,29 @@ goto :MENU
 
 REM ============================================================
 REM  5. METTRE A JOUR LE SITE
+REM     RISQUE : peut ecraser des modifications locales non enregistrees
+REM     -> confirmation demandee avant de lancer
 REM ============================================================
+:CONFIRM_METTRE_A_JOUR
+cls
+echo ============================================================
+echo   METTRE A JOUR LE SITE
+echo ============================================================
+echo.
+echo Cette option va recuperer la derniere version du site depuis
+echo Internet. Si des fichiers ont ete modifies manuellement sur cet
+echo ordinateur, ils pourraient etre affectes par la mise a jour.
+echo.
+set /p CONFIRME="Veux-tu continuer ? (oui / non) : "
+if /i not "%CONFIRME%"=="oui" (
+    echo.
+    echo Operation annulee, aucun changement effectue.
+    echo.
+    pause
+    goto :MENU
+)
+goto :METTRE_A_JOUR
+
 :METTRE_A_JOUR
 cls
 echo ============================================================
@@ -354,6 +399,8 @@ goto :MENU
 
 REM ============================================================
 REM  6. TOUT REINSTALLER DEPUIS ZERO
+REM     RISQUE ELEVE : supprime le dossier et les donnees locales
+REM     -> confirmation deja en place, conservee telle quelle
 REM ============================================================
 :TOUT_REFAIRE
 cls
@@ -419,7 +466,7 @@ pause
 goto :MENU
 
 REM ============================================================
-REM  7. AIDE
+REM  7. AIDE  (sans risque, aucune confirmation)
 REM ============================================================
 :AIDE
 cls
@@ -434,17 +481,22 @@ echo.
 echo   1. Demarrer le site       - a utiliser a chaque fois que tu veux
 echo                                que les etudiants puissent emprunter
 echo                                des livres depuis leur telephone.
+echo                                (aucun risque)
 echo   2. Afficher le lien       - montre l'adresse a taper sur un
 echo                                telephone, sans redemarrer le site.
+echo                                (aucun risque)
 echo   3. Verifier l'installation - controle que tout est pret, sans
-echo                                rien modifier.
+echo                                rien modifier. (aucun risque)
 echo   4. Installer/reparer      - a utiliser si l'option 1 affiche une
 echo                                erreur, ou la toute premiere fois.
+echo                                (confirmation demandee)
 echo   5. Mettre a jour          - recupere les dernieres ameliorations
 echo                                du site depuis Internet.
+echo                                (confirmation demandee)
 echo   6. Tout refaire           - en dernier recours si plus rien ne
-echo                                fonctionne. Attention, cela efface
-echo                                les donnees locales deja enregistrees.
+echo                                fonctionne. Efface les donnees
+echo                                locales deja enregistrees.
+echo                                (confirmation obligatoire)
 echo.
 echo En cas de probleme persistant, contacte la personne qui a developpe
 echo le site en lui montrant le message d'erreur affiche a l'ecran.
