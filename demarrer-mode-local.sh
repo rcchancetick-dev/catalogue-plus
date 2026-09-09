@@ -6,6 +6,9 @@ echo "  CATALOGUE+ - DEMARRAGE DU MODE LOCAL (SANS INTERNET)"
 echo "============================================================"
 echo
 
+REPO_URL="https://github.com/rcchancetick-dev/catalogue-plus.git"
+PROJECT_DIR="catalogue-plus"
+
 if ! command -v node &> /dev/null; then
     echo "[ERREUR] Node.js n'est pas installe sur cet ordinateur."
     echo
@@ -17,12 +20,61 @@ if ! command -v node &> /dev/null; then
     read -p "Appuie sur Entree pour fermer..."
     exit 1
 fi
-
 echo "[OK] Node.js detecte."
 echo
 
+if [ -f "package.json" ] && [ -d "pages" ]; then
+    echo "[INFO] Projet detecte dans le dossier courant."
+else
+    echo "[INFO] Aucun projet Catalogue+ trouve dans ce dossier."
+    echo "        Ce script va telecharger automatiquement tout le code source."
+    echo
+
+    if ! command -v git &> /dev/null; then
+        echo "[ERREUR] Git n'est pas installe sur cet ordinateur, il est necessaire"
+        echo "         pour telecharger et mettre a jour automatiquement le projet."
+        echo
+        echo "Pour l'installer :"
+        echo "  - Mac : tape 'git' dans le terminal, macOS proposera de l'installer"
+        echo "  - Linux : sudo apt install git   (ou l'equivalent de ta distribution)"
+        echo
+        read -p "Appuie sur Entree pour fermer..."
+        exit 1
+    fi
+    echo "[OK] Git detecte."
+    echo
+
+    if [ -d "$PROJECT_DIR" ]; then
+        echo "[INFO] Un dossier \"$PROJECT_DIR\" existe deja a cote de ce script."
+        cd "$PROJECT_DIR"
+    else
+        echo "[INFO] Telechargement du projet complet depuis GitHub..."
+        echo "        (necessite une connexion Internet, une seule fois)"
+        echo
+        git clone "$REPO_URL" "$PROJECT_DIR"
+        cd "$PROJECT_DIR"
+        echo
+        echo "[OK] Projet telecharge avec succes dans le dossier \"$PROJECT_DIR\"."
+        echo
+    fi
+fi
+
+if command -v git &> /dev/null && [ -d ".git" ]; then
+    echo "============================================================"
+    echo "  VERIFICATION DES MISES A JOUR..."
+    echo "============================================================"
+    echo
+    if git pull; then
+        echo "[OK] Projet a jour."
+    else
+        echo "[ATTENTION] La mise a jour automatique a echoue (pas d'Internet ?)."
+        echo "            Le site va quand meme demarrer avec la version deja presente."
+    fi
+    echo
+fi
+
 if [ ! -d "node_modules" ]; then
-    echo "[INFO] Premiere installation detectee. Installation des dependances..."
+    echo "[INFO] Installation des dependances (premiere fois ou mise a jour)..."
     echo "        (cette etape peut prendre quelques minutes, patience)"
     echo
     npm install
