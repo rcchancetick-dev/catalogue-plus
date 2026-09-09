@@ -47,8 +47,6 @@ exit /b 0
 
 REM ============================================================
 REM  Utilitaire : verifier si le projet est present.
-REM  Renvoie ERRORLEVEL 0 si trouve (et se place dedans),
-REM  ERRORLEVEL 1 sinon.
 REM ============================================================
 :VERIF_PROJET_PRESENT
 if exist "package.json" (
@@ -64,8 +62,6 @@ exit /b 1
 
 REM ============================================================
 REM  Utilitaire : se positionner dans le dossier du projet
-REM  (le telecharge automatiquement s'il est absent)
-REM  Renvoie ERRORLEVEL 0 en cas de succes, 1 en cas d'echec.
 REM ============================================================
 :ALLER_DANS_PROJET
 call :VERIF_PROJET_PRESENT
@@ -104,7 +100,9 @@ echo.
 exit /b 0
 
 REM ============================================================
-REM  1. DEMARRER LE SITE  (sans risque, aucune confirmation)
+REM  1. DEMARRER LE SITE
+REM     Utilise directement "npm run dev -- -H 0.0.0.0"
+REM     (methode connue et fonctionnelle).
 REM ============================================================
 :DEMARRER
 cls
@@ -131,12 +129,13 @@ if not exist "node_modules" (
     echo.
     call npm install
     echo.
-)
-if exist "offline-server\package.json" (
-    if not exist "offline-server\node_modules" (
-        pushd offline-server
-        call npm install
-        popd
+    if %ERRORLEVEL% NEQ 0 (
+        echo [ERREUR] L'installation des composants a echoue.
+        echo          Verifie ta connexion Internet et reessaie
+        echo          (option 4 du menu).
+        echo.
+        pause
+        goto MENU
     )
 )
 
@@ -158,25 +157,22 @@ echo ============================================================
 echo   LE SITE DEMARRE... (fenetre a laisser ouverte)
 echo ============================================================
 echo.
+echo Commande utilisee : npm run dev -- -H 0.0.0.0
 echo Pour arreter le site : appuie sur Ctrl+C, ou ferme cette fenetre.
+echo Si une erreur s'affiche ci-dessous, elle vient directement de Next.js.
 echo.
 
-if exist "offline-server\server.js" (
-    pushd offline-server
-    node server.js
-    popd
-) else (
-    call npm run offline
-)
+call npm run dev -- -H 0.0.0.0
 
 echo.
-echo Le site s'est arrete.
+echo ------------------------------------------------------------
+echo Le site s'est arrete ou a rencontre une erreur (voir ci-dessus).
+echo ------------------------------------------------------------
 pause
 goto MENU
 
 REM ============================================================
 REM  2. AFFICHER LE LIEN DE CONNEXION SANS DEMARRER LE SITE
-REM     (sans risque, aucune confirmation)
 REM ============================================================
 :AFFICHER_LIEN
 cls
@@ -203,7 +199,7 @@ pause
 goto MENU
 
 REM ============================================================
-REM  3. VERIFIER L'INSTALLATION  (sans risque, aucune confirmation)
+REM  3. VERIFIER L'INSTALLATION
 REM ============================================================
 :VERIFIER
 cls
@@ -271,7 +267,6 @@ goto MENU
 
 REM ============================================================
 REM  4. INSTALLER OU REPARER LES COMPOSANTS
-REM     RISQUE : peut ecraser/reinstaller des composants existants
 REM ============================================================
 :CONFIRM_INSTALLER
 cls
@@ -351,7 +346,6 @@ goto MENU
 
 REM ============================================================
 REM  5. METTRE A JOUR LE SITE
-REM     RISQUE : peut ecraser des modifications locales non enregistrees
 REM ============================================================
 :CONFIRM_METTRE_A_JOUR
 cls
@@ -427,7 +421,6 @@ goto MENU
 
 REM ============================================================
 REM  6. TOUT REINSTALLER DEPUIS ZERO
-REM     RISQUE ELEVE : supprime le dossier et les donnees locales
 REM ============================================================
 :CONFIRM_TOUT_REFAIRE
 cls
@@ -494,7 +487,7 @@ pause
 goto MENU
 
 REM ============================================================
-REM  7. AIDE  (sans risque, aucune confirmation)
+REM  7. AIDE
 REM ============================================================
 :AIDE
 cls
