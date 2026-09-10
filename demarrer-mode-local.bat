@@ -103,7 +103,6 @@ exit /b 0
 
 REM ============================================================
 REM  1. DEMARRER LE SITE EN LIGNE (avec Internet)
-REM     Utilise "npm run dev -- -H 0.0.0.0" (methode connue).
 REM ============================================================
 :DEMARRER_EN_LIGNE
 cls
@@ -177,10 +176,7 @@ goto MENU
 
 REM ============================================================
 REM  2. DEMARRER LE SERVEUR HORS LIGNE (sans Internet)
-REM     Suit exactement la procedure du README :
-REM     cd offline-server && npm install && cp .env.example .env
-REM     && npm run init-data && npm start
-REM     Le serveur ecoute sur http://localhost:3500
+REM     La base est initialisee dans offline-server/data/catalogueplus.db
 REM ============================================================
 :DEMARRER_HORS_LIGNE
 cls
@@ -247,7 +243,7 @@ if not exist ".env" (
     )
 )
 
-if not exist "catalogue-local" (
+if not exist "data\catalogueplus.db" (
     echo [INFO] Initialisation de la base de donnees locale...
     echo.
     call npm run init-data
