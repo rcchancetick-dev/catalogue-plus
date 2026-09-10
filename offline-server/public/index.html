@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catalogue+ (mode hors-ligne)</title>
+<style>
+  :root { --primary:#1e3a5f; --accent:#2f855a; --bg:#f4f6f8; --danger:#c0392b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Segoe UI, Arial, sans-serif; background: var(--bg); color:#222; }
+  header { background: var(--primary); color:#fff; padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; }
+  header h1 { margin:0; font-size:1.3rem; }
+  #status { font-size:.85rem; padding:.25rem .6rem; border-radius:1rem; background:#334; }
+  main { max-width:900px; margin:1.5rem auto; padding:0 1rem; }
+  .card { background:#fff; border-radius:.5rem; padding:1rem 1.25rem; margin-bottom:1rem; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  input, select, button { font-size:1rem; padding:.5rem; border-radius:.35rem; border:1px solid #ccc; }
+  button { background: var(--primary); color:#fff; border:none; cursor:pointer; }
+  button.secondary { background:#607d8b; }
+  button:hover { opacity:.9; }
+  .row { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.5rem; }
+  .row > * { flex:1; min-width:140px; }
+  table { width:100%; border-collapse:collapse; margin-top:.5rem; }
+  th, td { text-align:left; padding:.5rem; border-bottom:1px solid #eee; font-size:.9rem; }
+  .badge { padding:.15rem .5rem; border-radius:1rem; font-size:.75rem; color:#fff; }
+  .badge.dispo { background: var(--accent); }
+  .badge.indispo { background: var(--danger); }
+  .msg { padding:.5rem .75rem; border-radius:.35rem; margin:.5rem 0; font-size:.9rem; }
+  .msg.ok { background:#d4edda; color:#155724; }
+  .msg.err { background:#f8d7da; color:#721c24; }
+  .tabs { display:flex; gap:.5rem; margin-bottom:1rem; }
+  .tabs button { background:#e2e8f0; color:#222; }
+  .tabs button.active { background: var(--primary); color:#fff; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Catalogue+ — mode hors-ligne</h1>
+  <span id="status">Verification...</span>
+</header>
+<main>
+  <div class="tabs">
+    <button id="tabCatalogue" class="active">Catalogue</button>
+    <button id="tabCompte">Mon compte</button>
+    <button id="tabAdmin">Admin</button>
+  </div>
+
+  <section id="viewCatalogue">
+    <div class="card">
+      <div class="row">
+        <input id="rechercheInput" placeholder="Rechercher un titre ou un auteur..." />
+        <button id="rechercheBtn">Rechercher</button>
+      </div>
+      <div id="messagesCatalogue"></div>
+      <table>
+        <thead><tr><th>Titre</th><th>Auteur</th><th>Disponibilite</th><th></th></tr></thead>
+        <tbody id="booksBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="viewCompte" class="hidden">
+    <div class="card">
+      <h3>Connexion</h3>
+      <div class="row">
+        <input id="loginEmail" placeholder="Email" />
+        <input id="loginPassword" type="password" placeholder="Mot de passe" />
+        <button id="loginBtn">Se connecter</button>
+      </div>
+      <div id="messagesCompte"></div>
+      <p style="font-size:.85rem;color:#666">Pas encore de compte local ? Utilisez le formulaire d'inscription du site en ligne habituel, ou demandez a un administrateur d'en creer un pour vous en salle.</p>
+      <div id="mesEmprunts"></div>
+    </div>
+  </section>
+
+  <section id="viewAdmin" class="hidden">
+    <div class="card">
+      <h3>Connexion admin</h3>
+      <div class="row">
+        <input id="adminEmail" placeholder="Email admin" />
+        <input id="adminPassword" type="password" placeholder="Mot de passe" />
+        <input id="adminCode" placeholder="Code d'acces" />
+        <button id="adminLoginBtn">Se connecter</button>
+      </div>
+      <div id="messagesAdmin"></div>
+      <div id="adminPanel" class="hidden">
+        <h4>Demandes d'emprunt</h4>
+        <table><thead><tr><th>Livre</th><th>Etudiant</th><th>Statut</th><th></th></tr></thead><tbody id="loansBody"></tbody></table>
+        <h4>Synchronisation</h4>
+        <button id="syncBtn" class="secondary">Synchroniser maintenant</button>
+        <span id="syncResult"></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const api = (path, opts) => fetch(path, Object.assign({ credentials: 'include', headers: { 'Content-Type': 'application/json' } }, opts)).then(async r => ({ ok: r.ok, status: r.status, data: await r.json().catch(() => ({})) }));
+
+function showMsg(elId, text, ok) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '<div class="msg ' + (ok ? 'ok' : 'err') + '">' + text + '</div>';
+}
+
+async function checkStatus() {
+  const statusEl = document.getElementById('status');
+  const r = await api('/api/sync/status').catch(() => null);
+  if (r && r.ok) {
+    statusEl.textContent = r.data.online ? 'En ligne (synchronise)' : 'Hors ligne — donnees en attente: ' + (r.data.pendingUsers + r.data.pendingLoans);
+  } else {
+    statusEl.textContent = 'Serveur local actif';
+  }
+}
+
+async function loadBooks(search) {
+  const q = search ? ('?search=' + encodeURIComponent(search)) : '';
+  const r = await api('/api/books' + q);
+  const tbody = document.getElementById('booksBody');
+  tbody.innerHTML = '';
+  if (!r.ok) { showMsg('messagesCatalogue', 'Impossible de charger le catalogue.', false); return; }
+  r.data.books.forEach(b => {
+    const tr = document.createElement('tr');
+    const dispo = b.exemplaires_disponibles > 0;
+    tr.innerHTML = '<td>' + b.titre + '</td><td>' + b.auteur + '</td>' +
+      '<td><span class="badge ' + (dispo ? 'dispo' : 'indispo') + '">' + (dispo ? 'Disponible' : 'Indisponible') + '</span></td>' +
+      '<td>' + (dispo ? '<button data-uid="' + b.uid + '" class="emprunterBtn">Emprunter</button>' : '') + '</td>';
+    tbody.appendChild(tr);
+  });
+  document.querySelectorAll('.emprunterBtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const res = await api('/api/loans', { method: 'POST', body: JSON.stringify({ bookUid: btn.dataset.uid, dureeJours: 14 }) });
+      showMsg('messagesCatalogue', res.data.message || res.data.error, res.ok);
+      if (res.ok) loadBooks();
+    });
+  });
+}
+
+document.getElementById('rechercheBtn').addEventListener('click', () => loadBooks(document.getElementById('rechercheInput').value));
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+  showMsg('messagesCompte', r.data.message || r.data.error, r.ok);
+  if (r.ok) loadMesEmprunts();
+});
+
+async function loadMesEmprunts() {
+  const r = await api('/api/loans');
+  const el = document.getElementById('mesEmprunts');
+  if (!r.ok) { el.innerHTML = ''; return; }
+  el.innerHTML = '<h4>Mes emprunts</h4><ul>' + r.data.loans.map(l => '<li>' + l.livre_titre + ' — ' + l.statut + '</li>').join('') + '</ul>';
+}
+
+document.getElementById('adminLoginBtn').addEventListener('click', async () => {
+  const email = document.getElementById('adminEmail').value;
+  const password = document.getElementById('adminPassword').value;
+  const secretCode = document.getElementById('adminCode').value;
+  const r = await api('/api/auth/admin-login', { method: 'POST', body: JSON.stringify({ email, password, secretCode }) });
+  showMsg('messagesAdmin', r.data.message || r.data.error, r.ok);
+  if (r.ok) { document.getElementById('adminPanel').classList.remove('hidden'); loadLoansAdmin(); }
+});
+
+async function loadLoansAdmin() {
+  const r = await api('/api/loans');
+  const tbody = document.getElementById('loansBody');
+  tbody.innerHTML = '';
+  if (!r.ok) return;
+  r.data.loans.forEach(l => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + l.livre_titre + '</td><td>' + (l.user_prenom || '') + ' ' + (l.user_nom || '') + '</td><td>' + l.statut + '</td>' +
+      '<td>' + (l.statut === 'en_attente' ? '<button data-id="' + l.id + '" class="validerBtn">Valider</button>' : '') + '</td>';
+    tbody.appendChild(tr);
+  });
+  document.querySelectorAll('.validerBtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const res = await api('/api/loans/validate/' + btn.dataset.id, { method: 'POST' });
+      showMsg('messagesAdmin', res.data.message || res.data.error, res.ok);
+      loadLoansAdmin();
+    });
+  });
+}
+
+document.getElementById('syncBtn').addEventListener('click', async () => {
+  document.getElementById('syncResult').textContent = 'Synchronisation en cours...';
+  const r = await api('/api/sync', { method: 'POST' });
+  if (r.ok) {
+    document.getElementById('syncResult').textContent = 'OK: ' + r.data.usersSynced + ' utilisateur(s), ' + r.data.loansSynced + ' emprunt(s) synchronises.';
+  } else {
+    document.getElementById('syncResult').textContent = 'Echec: ' + (r.data.error || 'erreur inconnue');
+  }
+  checkStatus();
+});
+
+function switchTab(tab) {
+  ['Catalogue', 'Compte', 'Admin'].forEach(t => {
+    document.getElementById('view' + t).classList.toggle('hidden', t !== tab);
+    document.getElementById('tab' + t).classList.toggle('active', t === tab);
+  });
+}
+document.getElementById('tabCatalogue').addEventListener('click', () => switchTab('Catalogue'));
+document.getElementById('tabCompte').addEventListener('click', () => switchTab('Compte'));
+document.getElementById('tabAdmin').addEventListener('click', () => switchTab('Admin'));
+
+loadBooks();
+checkStatus();
+setInterval(checkStatus, 30000);
+</script>
+</body>
+</html>
