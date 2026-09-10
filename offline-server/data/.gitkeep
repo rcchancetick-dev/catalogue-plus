@@ -1,0 +1,2 @@
+# Ce fichier permet de conserver le dossier data/ dans Git.
+# Le fichier catalogueplus.db lui-meme est ignore (voir .gitignore).
