@@ -4,207 +4,469 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Catalogue+ (mode hors-ligne)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
-  :root { --primary:#1e3a5f; --accent:#2f855a; --bg:#f4f6f8; --danger:#c0392b; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: Segoe UI, Arial, sans-serif; background: var(--bg); color:#222; }
-  header { background: var(--primary); color:#fff; padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; }
-  header h1 { margin:0; font-size:1.3rem; }
-  #status { font-size:.85rem; padding:.25rem .6rem; border-radius:1rem; background:#334; }
-  main { max-width:900px; margin:1.5rem auto; padding:0 1rem; }
-  .card { background:#fff; border-radius:.5rem; padding:1rem 1.25rem; margin-bottom:1rem; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-  input, select, button { font-size:1rem; padding:.5rem; border-radius:.35rem; border:1px solid #ccc; }
-  button { background: var(--primary); color:#fff; border:none; cursor:pointer; }
-  button.secondary { background:#607d8b; }
-  button:hover { opacity:.9; }
-  .row { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.5rem; }
-  .row > * { flex:1; min-width:140px; }
-  table { width:100%; border-collapse:collapse; margin-top:.5rem; }
-  th, td { text-align:left; padding:.5rem; border-bottom:1px solid #eee; font-size:.9rem; }
-  .badge { padding:.15rem .5rem; border-radius:1rem; font-size:.75rem; color:#fff; }
-  .badge.dispo { background: var(--accent); }
-  .badge.indispo { background: var(--danger); }
-  .msg { padding:.5rem .75rem; border-radius:.35rem; margin:.5rem 0; font-size:.9rem; }
-  .msg.ok { background:#d4edda; color:#155724; }
-  .msg.err { background:#f8d7da; color:#721c24; }
-  .tabs { display:flex; gap:.5rem; margin-bottom:1rem; }
-  .tabs button { background:#e2e8f0; color:#222; }
-  .tabs button.active { background: var(--primary); color:#fff; }
-  .hidden { display:none; }
+:root{--primary:#6366f1;--secondary:#1a1a2e;--accent:#f472b6;--success:#22c55e;--danger:#ef4444;--warning:#f59e0b;--bg:#f8fafc;--text:#1e293b;--text-light:#64748b;--border:#e2e8f0;--radius:16px;--shadow:0 4px 24px rgba(0,0,0,0.06);--font-heading:'Poppins',sans-serif;--font-body:'Inter',sans-serif;--transition-theme:background-color .3s ease,color .3s ease,border-color .3s ease;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.6;transition:var(--transition-theme);}
+h1,h2,h3,h4{font-family:var(--font-heading);font-weight:700;}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;cursor:pointer;border:none;}
+img{max-width:100%;display:block;}
+.text-gradient{background:linear-gradient(90deg,var(--primary),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+.navbar{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);transition:var(--transition-theme);}
+.navbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 24px;}
+.navbar-brand{display:flex;align-items:center;gap:8px;font-family:var(--font-heading);font-weight:800;font-size:22px;}
+.brand-icon{font-size:24px;}.brand-plus{color:var(--primary);}
+.navbar-links-desktop{display:flex;align-items:center;gap:28px;font-weight:500;}
+.navbar-links-desktop a{cursor:pointer;}
+.navbar-links-desktop a:hover{color:var(--primary);}
+.navbar-links-desktop a.active{color:var(--primary);}
+.navbar-user{display:flex;align-items:center;gap:14px;}
+.btn-nav-primary{background:var(--primary);color:#fff;padding:10px 22px;border-radius:30px;font-weight:600;}
+.btn-nav-secondary{background:#eef2ff;color:var(--primary);padding:8px 16px;border-radius:20px;font-size:14px;}
+.btn-nav-logout{background:none;color:var(--text-light);font-size:14px;}
+.theme-toggle{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:#eef2ff;color:var(--primary);border:none;cursor:pointer;flex-shrink:0;font-size:16px;}
+
+.offline-banner{background:var(--warning);color:#fff;text-align:center;padding:10px;font-weight:600;font-size:14px;}
+.sync-status{font-size:12px;padding:4px 12px;border-radius:20px;background:#eef2ff;color:var(--primary);font-weight:600;}
+.sync-status.online{background:#dcfce7;color:#166534;}
+.sync-status.pending{background:#fef3c7;color:#92400e;}
+
+.hero{position:relative;overflow:hidden;padding:70px 24px 50px;text-align:center;background:linear-gradient(180deg,#eef2ff 0%,#ffffff 100%);}
+.hero-content{max-width:720px;margin:0 auto;position:relative;z-index:2;}
+.hero-badge{display:inline-block;background:#fff;border:1px solid var(--border);padding:6px 16px;border-radius:30px;font-size:13px;font-weight:600;margin-bottom:20px;box-shadow:var(--shadow);}
+.hero h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin-bottom:16px;}
+.hero-subtitle{font-size:16px;color:var(--text-light);margin-bottom:20px;}
+
+.tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 24px 30px;max-width:600px;margin:0 auto;background:#f1f5f9;border-radius:10px;padding:4px;margin-bottom:20px;}
+.tabs button{flex:1;padding:10px;border-radius:8px;background:none;font-weight:600;color:var(--text-light);min-width:100px;}
+.tabs button.active{background:#fff;color:var(--primary);box-shadow:var(--shadow);}
+
+.page-header{max-width:1200px;margin:0 auto;padding:40px 24px 10px;}
+.page-header h1{font-size:28px;margin-bottom:6px;}
+.page-header p{color:var(--text-light);}
+.search-bar{display:flex;gap:12px;margin-bottom:30px;flex-wrap:wrap;max-width:1200px;margin-left:auto;margin-right:auto;padding:0 24px;}
+.search-bar input,.search-bar select{padding:12px 16px;border-radius:10px;border:1px solid var(--border);font-size:15px;flex:1;min-width:200px;background:#fff;color:var(--text);}
+.search-bar button{padding:12px 24px;border-radius:10px;background:var(--primary);color:#fff;font-weight:600;}
+
+.section{max-width:1200px;margin:0 auto;padding:0 24px 60px;}
+.loading-text{text-align:center;color:var(--text-light);padding:60px 0;}
+.books-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+@media(max-width:900px){.books-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.books-grid{grid-template-columns:1fr;}}
+.book-card{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:var(--transition-theme);}
+.book-card-cover{position:relative;height:180px;background:#eef2ff;display:flex;align-items:center;justify-content:center;}
+.book-card-cover-placeholder{font-size:48px;}
+.badge{position:absolute;top:10px;right:10px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+.badge-dispo{background:#dcfce7;color:#166534;}.badge-indispo{background:#fee2e2;color:#991b1b;}
+.book-card-body{padding:18px;}
+.book-card-author{color:var(--text-light);font-size:14px;margin-bottom:10px;}
+.book-card-tag{display:inline-block;background:#f1f5f9;color:var(--text-light);font-size:12px;padding:3px 10px;border-radius:12px;margin-bottom:10px;}
+.book-card-body button{width:100%;margin-top:10px;padding:10px;border-radius:20px;background:var(--primary);color:#fff;font-weight:600;font-size:14px;}
+.book-card-body button:disabled{background:#e2e8f0;color:var(--text-light);cursor:not-allowed;}
+
+.auth-section{max-width:500px;margin:40px auto 60px;padding:0 24px;}
+.auth-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:40px;transition:var(--transition-theme);}
+.auth-tabs{display:flex;gap:8px;margin-bottom:28px;background:#f1f5f9;padding:4px;border-radius:10px;}
+.auth-tabs button{flex:1;padding:10px;border-radius:8px;background:none;font-weight:600;color:var(--text-light);}
+.auth-tabs button.active{background:#fff;color:var(--primary);box-shadow:var(--shadow);}
+.auth-form{display:flex;flex-direction:column;gap:6px;}
+.auth-form label{font-size:13px;font-weight:600;color:var(--text-light);margin-top:8px;}
+.auth-form input,.auth-form select{padding:12px 14px;border-radius:10px;border:1px solid var(--border);font-size:15px;width:100%;font-family:inherit;background:#fff;color:var(--text);}
+.auth-form button[type="submit"]{margin-top:20px;padding:14px 30px;border-radius:30px;font-weight:600;font-size:15px;background:var(--primary);color:#fff;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.checkbox-row input{width:auto;}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:1000;padding:14px 28px;border-radius:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.15);cursor:pointer;max-width:90vw;text-align:center;display:none;}
+.toast-success{background:#dcfce7;color:#166534;}.toast-error{background:#fee2e2;color:#991b1b;}.toast-info{background:#dbeafe;color:#1e40af;}
+
+.loans-list{display:flex;flex-direction:column;gap:16px;}
+.loan-item{background:#fff;border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;transition:var(--transition-theme);}
+.status-badge{padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;}
+.status-pending{background:#fef3c7;color:#92400e;}.status-active{background:#dbeafe;color:#1e40af;}
+.status-rejected{background:#fee2e2;color:#991b1b;}.status-returned{background:#dcfce7;color:#166534;}
+.loan-return-date,.loan-motif{font-size:13px;color:var(--text-light);margin-top:4px;}
+
+.admin-login-section{padding:60px 24px;display:flex;justify-content:center;}
+.admin-login-card{background:#fff;border-radius:var(--radius);padding:44px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow);}
+.admin-login-icon{font-size:44px;margin-bottom:12px;}
+.admin-login-card .auth-form{text-align:left;}
+.admin-stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px;}
+.admin-stat-card{background:#fff;border-radius:14px;padding:20px;box-shadow:var(--shadow);text-align:center;}
+.admin-stat-card span{display:block;font-size:24px;font-weight:800;color:var(--primary);}
+.admin-table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.admin-table th,.admin-table td{padding:14px 16px;text-align:left;font-size:14px;border-bottom:1px solid var(--border);}
+.admin-table th{background:#f8fafc;font-weight:700;color:var(--text-light);font-size:12px;text-transform:uppercase;}
+.btn-small{padding:6px 12px;border-radius:8px;background:#eef2ff;color:var(--primary);font-size:12px;font-weight:600;}
+.admin-section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+
+.footer{background:var(--secondary);color:#cbd5e1;padding:40px 24px 20px;margin-top:40px;}
+.footer-inner{max-width:1200px;margin:0 auto;text-align:center;}
+.footer-bottom{font-size:13px;color:#64748b;margin-top:16px;}
+.hidden{display:none !important;}
+
+[data-theme="dark"]{--bg:#0f1115;--text:#e2e8f0;--text-light:#94a3b8;--border:#2a2f3a;--shadow:0 4px 24px rgba(0,0,0,.35);}
+[data-theme="dark"] .navbar{background:rgba(15,17,21,0.85);}
+[data-theme="dark"] .hero{background:linear-gradient(180deg,#14161d 0%,#0f1115 100%);}
+[data-theme="dark"] .hero-badge{background:#1a1d26;color:var(--text);}
+[data-theme="dark"] .book-card,[data-theme="dark"] .auth-card,[data-theme="dark"] .admin-login-card,
+[data-theme="dark"] .admin-stat-card,[data-theme="dark"] .admin-table,[data-theme="dark"] .loan-item{background:#1a1d26;}
+[data-theme="dark"] .book-card-cover{background:#20242f;}
+[data-theme="dark"] .admin-table th{background:#14161d;}
+[data-theme="dark"] .auth-tabs,[data-theme="dark"] .tabs{background:#14161d;}
+[data-theme="dark"] .auth-tabs button.active,[data-theme="dark"] .tabs button.active{background:#1a1d26;}
+[data-theme="dark"] .auth-form input,[data-theme="dark"] .auth-form select,
+[data-theme="dark"] .search-bar input,[data-theme="dark"] .search-bar select{background:#14161d;color:var(--text);}
+[data-theme="dark"] .btn-nav-secondary{background:#1e2230;color:#a5b4fc;}
+[data-theme="dark"] .theme-toggle{background:#1e2230;color:#a5b4fc;}
+[data-theme="dark"] .footer{background:#08090c;}
 </style>
 </head>
 <body>
-<header>
-  <h1>Catalogue+ — mode hors-ligne</h1>
-  <span id="status">Verification...</span>
-</header>
-<main>
-  <div class="tabs">
-    <button id="tabCatalogue" class="active">Catalogue</button>
-    <button id="tabCompte">Mon compte</button>
-    <button id="tabAdmin">Admin</button>
+
+<div id="offlineBanner" class="offline-banner hidden">Mode hors-ligne actif — vous etes connecte au serveur de secours de la bibliotheque.</div>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="navbar-brand" onclick="switchTab('accueil')">
+      <span class="brand-icon">📚</span>Catalogue<span class="brand-plus">+</span>
+    </a>
+    <div class="navbar-links-desktop">
+      <a onclick="switchTab('accueil')" data-nav="accueil">Accueil</a>
+      <a onclick="switchTab('catalogue')" data-nav="catalogue">Catalogue</a>
+      <a onclick="switchTab('emprunts')" data-nav="emprunts">Mes emprunts</a>
+    </div>
+    <div class="navbar-user">
+      <span id="syncStatus" class="sync-status">Verification...</span>
+      <button class="theme-toggle" id="themeToggle" title="Changer de theme">🌙</button>
+      <span id="navGuest">
+        <a class="btn-nav-secondary" onclick="switchTab('connexion')">Connexion</a>
+      </span>
+      <span id="navUser" class="hidden">
+        <button class="btn-nav-logout" id="logoutBtn">Deconnexion</button>
+      </span>
+    </div>
   </div>
+</nav>
 
-  <section id="viewCatalogue">
-    <div class="card">
-      <div class="row">
-        <input id="rechercheInput" placeholder="Rechercher un titre ou un auteur..." />
-        <button id="rechercheBtn">Rechercher</button>
-      </div>
-      <div id="messagesCatalogue"></div>
-      <table>
-        <thead><tr><th>Titre</th><th>Auteur</th><th>Disponibilite</th><th></th></tr></thead>
-        <tbody id="booksBody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="viewCompte" class="hidden">
-    <div class="card">
-      <h3>Connexion</h3>
-      <div class="row">
-        <input id="loginEmail" placeholder="Email" />
-        <input id="loginPassword" type="password" placeholder="Mot de passe" />
-        <button id="loginBtn">Se connecter</button>
-      </div>
-      <div id="messagesCompte"></div>
-      <p style="font-size:.85rem;color:#666">Pas encore de compte local ? Utilisez le formulaire d'inscription du site en ligne habituel, ou demandez a un administrateur d'en creer un pour vous en salle.</p>
-      <div id="mesEmprunts"></div>
-    </div>
-  </section>
-
-  <section id="viewAdmin" class="hidden">
-    <div class="card">
-      <h3>Connexion admin</h3>
-      <div class="row">
-        <input id="adminEmail" placeholder="Email admin" />
-        <input id="adminPassword" type="password" placeholder="Mot de passe" />
-        <input id="adminCode" placeholder="Code d'acces" />
-        <button id="adminLoginBtn">Se connecter</button>
-      </div>
-      <div id="messagesAdmin"></div>
-      <div id="adminPanel" class="hidden">
-        <h4>Demandes d'emprunt</h4>
-        <table><thead><tr><th>Livre</th><th>Etudiant</th><th>Statut</th><th></th></tr></thead><tbody id="loansBody"></tbody></table>
-        <h4>Synchronisation</h4>
-        <button id="syncBtn" class="secondary">Synchroniser maintenant</button>
-        <span id="syncResult"></span>
-      </div>
+<main id="viewAccueil">
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-badge">🔌 Mode hors-ligne — serveur de secours</span>
+      <h1>Catalogue<span class="text-gradient">+</span> continue de fonctionner sans Internet</h1>
+      <p class="hero-subtitle">Consultez le catalogue, connectez-vous et empruntez un livre. Tout sera synchronise automatiquement avec le site en ligne des que le Wi-Fi sera retabli.</p>
     </div>
   </section>
 </main>
 
+<section id="viewCatalogue" class="hidden">
+  <div class="page-header">
+    <h1>Catalogue</h1>
+    <p>Recherchez un ouvrage par titre ou auteur. Fonctionne sans connexion Internet.</p>
+  </div>
+  <div class="search-bar">
+    <input id="rechercheInput" placeholder="Rechercher un titre ou un auteur..." />
+    <button id="rechercheBtn">Rechercher</button>
+  </div>
+  <div class="section">
+    <div id="catalogueLoading" class="loading-text">Chargement...</div>
+    <div id="booksGrid" class="books-grid"></div>
+  </div>
+</section>
+
+<section id="viewConnexion" class="hidden">
+  <div class="auth-section">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button id="authTabLogin" class="active" onclick="switchAuthMode('login')">Connexion</button>
+        <button id="authTabRegister" onclick="switchAuthMode('register')">Inscription</button>
+      </div>
+      <form id="loginForm" class="auth-form">
+        <label>Email</label>
+        <input id="loginEmail" type="email" required />
+        <label>Mot de passe</label>
+        <input id="loginPassword" type="password" required />
+        <button type="submit">Se connecter</button>
+      </form>
+      <form id="registerForm" class="auth-form hidden">
+        <div class="form-row">
+          <div><label>Nom</label><input id="regNom" required /></div>
+          <div><label>Prenom</label><input id="regPrenom" required /></div>
+        </div>
+        <label>Numero</label>
+        <input id="regNumero" required />
+        <label>Email</label>
+        <input id="regEmail" type="email" required />
+        <label>Etablissement</label>
+        <input id="regEtablissement" />
+        <label>Niveau</label>
+        <input id="regNiveau" />
+        <label>Mot de passe</label>
+        <input id="regPassword" type="password" required />
+        <label>Confirmer le mot de passe</label>
+        <input id="regConfirmPassword" type="password" required />
+        <button type="submit">Creer mon compte</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section id="viewEmprunts" class="hidden">
+  <div class="page-header">
+    <h1>Mes emprunts</h1>
+    <p>Historique et suivi de vos demandes.</p>
+  </div>
+  <div class="section">
+    <div id="loansList" class="loans-list"></div>
+  </div>
+</section>
+
+<section id="viewAdmin" class="hidden">
+  <div class="admin-login-section">
+    <div class="admin-login-card">
+      <div class="admin-login-icon">🔐</div>
+      <h2>Espace administrateur</h2>
+      <form id="adminLoginForm" class="auth-form">
+        <label>Email admin</label>
+        <input id="adminEmail" type="email" required />
+        <label>Mot de passe</label>
+        <input id="adminPassword" type="password" required />
+        <label>Code d'acces</label>
+        <input id="adminCode" required />
+        <button type="submit">Se connecter</button>
+      </form>
+    </div>
+  </div>
+  <div id="adminPanel" class="section hidden">
+    <div class="admin-section-header">
+      <h2>Tableau de bord admin</h2>
+      <button class="btn-small" id="syncBtn">🔄 Synchroniser maintenant</button>
+    </div>
+    <div class="admin-stats-grid">
+      <div class="admin-stat-card"><span id="statPending">0</span>Utilisateurs en attente</div>
+      <div class="admin-stat-card"><span id="statLoansPending">0</span>Emprunts en attente de sync</div>
+    </div>
+    <h3 style="margin-bottom:12px">Demandes d'emprunt</h3>
+    <table class="admin-table">
+      <thead><tr><th>Livre</th><th>Etudiant</th><th>Statut</th><th></th></tr></thead>
+      <tbody id="adminLoansBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <p><strong>Catalogue+</strong> — Mode hors-ligne (serveur de secours local)</p>
+    <p class="footer-bottom">Ecole Superieure Polytechnique d'Antsiranana — Projet academique 2026</p>
+  </div>
+</footer>
+
 <script>
 const api = (path, opts) => fetch(path, Object.assign({ credentials: 'include', headers: { 'Content-Type': 'application/json' } }, opts)).then(async r => ({ ok: r.ok, status: r.status, data: await r.json().catch(() => ({})) }));
 
-function showMsg(elId, text, ok) {
-  const el = document.getElementById(elId);
-  el.innerHTML = '<div class="msg ' + (ok ? 'ok' : 'err') + '">' + text + '</div>';
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast toast-' + (type || 'info');
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
-async function checkStatus() {
-  const statusEl = document.getElementById('status');
+function switchTab(tab) {
+  ['Accueil','Catalogue','Connexion','Emprunts','Admin'].forEach(t => {
+    const el = document.getElementById('view' + t);
+    if (el) el.classList.toggle('hidden', t.toLowerCase() !== tab);
+  });
+  document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('active', a.dataset.nav === tab));
+  if (tab === 'catalogue') loadBooks();
+  if (tab === 'emprunts') loadMesEmprunts();
+}
+
+function switchAuthMode(mode) {
+  document.getElementById('authTabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('authTabRegister').classList.toggle('active', mode === 'register');
+  document.getElementById('loginForm').classList.toggle('hidden', mode !== 'login');
+  document.getElementById('registerForm').classList.toggle('hidden', mode !== 'register');
+}
+
+let currentUser = null;
+let isAdmin = false;
+
+async function checkAuth() {
+  const r = await api('/api/auth/me');
+  currentUser = r.ok ? r.data.user : null;
+  document.getElementById('navGuest').classList.toggle('hidden', !!currentUser);
+  document.getElementById('navUser').classList.toggle('hidden', !currentUser);
+}
+
+async function checkSyncStatus() {
+  const el = document.getElementById('syncStatus');
+  const banner = document.getElementById('offlineBanner');
   const r = await api('/api/sync/status').catch(() => null);
   if (r && r.ok) {
-    statusEl.textContent = r.data.online ? 'En ligne (synchronise)' : 'Hors ligne — donnees en attente: ' + (r.data.pendingUsers + r.data.pendingLoans);
-  } else {
-    statusEl.textContent = 'Serveur local actif';
+    banner.classList.remove('hidden');
+    if (r.data.online) {
+      el.textContent = 'En ligne (synchronise)';
+      el.className = 'sync-status online';
+    } else {
+      const pending = r.data.pendingUsers + r.data.pendingLoans;
+      el.textContent = pending > 0 ? ('Hors ligne — ' + pending + ' en attente') : 'Hors ligne';
+      el.className = 'sync-status pending';
+    }
+    const sp = document.getElementById('statPending');
+    const sl = document.getElementById('statLoansPending');
+    if (sp) sp.textContent = r.data.pendingUsers;
+    if (sl) sl.textContent = r.data.pendingLoans;
   }
 }
 
 async function loadBooks(search) {
+  const loadingEl = document.getElementById('catalogueLoading');
+  const grid = document.getElementById('booksGrid');
+  loadingEl.classList.remove('hidden');
+  grid.innerHTML = '';
   const q = search ? ('?search=' + encodeURIComponent(search)) : '';
   const r = await api('/api/books' + q);
-  const tbody = document.getElementById('booksBody');
-  tbody.innerHTML = '';
-  if (!r.ok) { showMsg('messagesCatalogue', 'Impossible de charger le catalogue.', false); return; }
+  loadingEl.classList.add('hidden');
+  if (!r.ok) { showToast('Impossible de charger le catalogue.', 'error'); return; }
+  if (r.data.books.length === 0) { grid.innerHTML = '<p class="loading-text">Aucun livre trouve.</p>'; return; }
   r.data.books.forEach(b => {
-    const tr = document.createElement('tr');
     const dispo = b.exemplaires_disponibles > 0;
-    tr.innerHTML = '<td>' + b.titre + '</td><td>' + b.auteur + '</td>' +
-      '<td><span class="badge ' + (dispo ? 'dispo' : 'indispo') + '">' + (dispo ? 'Disponible' : 'Indisponible') + '</span></td>' +
-      '<td>' + (dispo ? '<button data-uid="' + b.uid + '" class="emprunterBtn">Emprunter</button>' : '') + '</td>';
-    tbody.appendChild(tr);
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.innerHTML =
+      '<div class="book-card-cover"><span class="book-card-cover-placeholder">📖</span>' +
+      '<span class="badge ' + (dispo ? 'badge-dispo' : 'badge-indispo') + '">' + (dispo ? 'Disponible' : 'Indisponible') + '</span></div>' +
+      '<div class="book-card-body">' +
+      '<h3>' + b.titre + '</h3>' +
+      '<p class="book-card-author">' + b.auteur + '</p>' +
+      (b.categorie ? '<span class="book-card-tag">' + b.categorie + '</span>' : '') +
+      '<button ' + (!dispo ? 'disabled' : '') + ' onclick="emprunter(\'' + b.uid + '\')">' + (dispo ? 'Emprunter' : 'Indisponible') + '</button>' +
+      '</div>';
+    grid.appendChild(card);
   });
-  document.querySelectorAll('.emprunterBtn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const res = await api('/api/loans', { method: 'POST', body: JSON.stringify({ bookUid: btn.dataset.uid, dureeJours: 14 }) });
-      showMsg('messagesCatalogue', res.data.message || res.data.error, res.ok);
-      if (res.ok) loadBooks();
-    });
-  });
+}
+
+async function emprunter(uid) {
+  if (!currentUser) { showToast('Connectez-vous pour emprunter.', 'error'); switchTab('connexion'); return; }
+  const r = await api('/api/loans', { method: 'POST', body: JSON.stringify({ bookUid: uid, dureeJours: 14 }) });
+  showToast(r.data.message || r.data.error, r.ok ? 'success' : 'error');
+  if (r.ok) loadBooks();
 }
 
 document.getElementById('rechercheBtn').addEventListener('click', () => loadBooks(document.getElementById('rechercheInput').value));
 
-document.getElementById('loginBtn').addEventListener('click', async () => {
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
-  showMsg('messagesCompte', r.data.message || r.data.error, r.ok);
-  if (r.ok) loadMesEmprunts();
+  showToast(r.data.message || r.data.error, r.ok ? 'success' : 'error');
+  if (r.ok) { await checkAuth(); switchTab('catalogue'); }
+});
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const body = {
+    nom: document.getElementById('regNom').value,
+    prenom: document.getElementById('regPrenom').value,
+    numero: document.getElementById('regNumero').value,
+    email: document.getElementById('regEmail').value,
+    etablissement: document.getElementById('regEtablissement').value,
+    niveau: document.getElementById('regNiveau').value,
+    is_etudiant: true,
+    password: document.getElementById('regPassword').value,
+    confirmPassword: document.getElementById('regConfirmPassword').value,
+  };
+  const r = await api('/api/auth/register', { method: 'POST', body: JSON.stringify(body) });
+  showToast(r.data.message || r.data.error, r.ok ? 'success' : 'error');
+  if (r.ok) { await checkAuth(); switchTab('catalogue'); }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await api('/api/auth/logout', { method: 'POST' });
+  currentUser = null;
+  await checkAuth();
+  switchTab('accueil');
 });
 
 async function loadMesEmprunts() {
+  if (!currentUser) { switchTab('connexion'); return; }
   const r = await api('/api/loans');
-  const el = document.getElementById('mesEmprunts');
-  if (!r.ok) { el.innerHTML = ''; return; }
-  el.innerHTML = '<h4>Mes emprunts</h4><ul>' + r.data.loans.map(l => '<li>' + l.livre_titre + ' — ' + l.statut + '</li>').join('') + '</ul>';
+  const list = document.getElementById('loansList');
+  list.innerHTML = '';
+  if (!r.ok || r.data.loans.length === 0) { list.innerHTML = '<p class="loading-text">Aucune demande.</p>'; return; }
+  const labels = { en_attente: ['En attente de validation', 'status-pending'], en_cours: ['Emprunt en cours', 'status-active'], refuse: ['Demande refusee', 'status-rejected'], retourne: ['Livre rendu', 'status-returned'] };
+  r.data.loans.forEach(l => {
+    const [label, cls] = labels[l.statut] || [l.statut, 'status-pending'];
+    const item = document.createElement('div');
+    item.className = 'loan-item';
+    item.innerHTML = '<div><strong>' + l.livre_titre + '</strong>' +
+      (l.motif_refus ? '<div class="loan-motif">Motif : ' + l.motif_refus + '</div>' : '') + '</div>' +
+      '<span class="status-badge ' + cls + '">' + label + '</span>';
+    list.appendChild(item);
+  });
 }
 
-document.getElementById('adminLoginBtn').addEventListener('click', async () => {
+document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
   const email = document.getElementById('adminEmail').value;
   const password = document.getElementById('adminPassword').value;
   const secretCode = document.getElementById('adminCode').value;
   const r = await api('/api/auth/admin-login', { method: 'POST', body: JSON.stringify({ email, password, secretCode }) });
-  showMsg('messagesAdmin', r.data.message || r.data.error, r.ok);
-  if (r.ok) { document.getElementById('adminPanel').classList.remove('hidden'); loadLoansAdmin(); }
+  showToast(r.data.message || r.data.error, r.ok ? 'success' : 'error');
+  if (r.ok) { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); e.target.closest('.admin-login-section').classList.add('hidden'); loadAdminLoans(); checkSyncStatus(); }
 });
 
-async function loadLoansAdmin() {
+async function loadAdminLoans() {
   const r = await api('/api/loans');
-  const tbody = document.getElementById('loansBody');
+  const tbody = document.getElementById('adminLoansBody');
   tbody.innerHTML = '';
   if (!r.ok) return;
   r.data.loans.forEach(l => {
     const tr = document.createElement('tr');
     tr.innerHTML = '<td>' + l.livre_titre + '</td><td>' + (l.user_prenom || '') + ' ' + (l.user_nom || '') + '</td><td>' + l.statut + '</td>' +
-      '<td>' + (l.statut === 'en_attente' ? '<button data-id="' + l.id + '" class="validerBtn">Valider</button>' : '') + '</td>';
+      '<td>' + (l.statut === 'en_attente' ? '<button class="btn-small" onclick="validerEmprunt(' + l.id + ')">Valider</button>' : '') + '</td>';
     tbody.appendChild(tr);
   });
-  document.querySelectorAll('.validerBtn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const res = await api('/api/loans/validate/' + btn.dataset.id, { method: 'POST' });
-      showMsg('messagesAdmin', res.data.message || res.data.error, res.ok);
-      loadLoansAdmin();
-    });
-  });
+}
+
+async function validerEmprunt(id) {
+  const r = await api('/api/loans/validate/' + id, { method: 'POST' });
+  showToast(r.data.message || r.data.error, r.ok ? 'success' : 'error');
+  loadAdminLoans();
 }
 
 document.getElementById('syncBtn').addEventListener('click', async () => {
-  document.getElementById('syncResult').textContent = 'Synchronisation en cours...';
+  showToast('Synchronisation en cours...', 'info');
   const r = await api('/api/sync', { method: 'POST' });
-  if (r.ok) {
-    document.getElementById('syncResult').textContent = 'OK: ' + r.data.usersSynced + ' utilisateur(s), ' + r.data.loansSynced + ' emprunt(s) synchronises.';
-  } else {
-    document.getElementById('syncResult').textContent = 'Echec: ' + (r.data.error || 'erreur inconnue');
-  }
-  checkStatus();
+  if (r.ok) showToast('OK : ' + r.data.usersSynced + ' utilisateur(s), ' + r.data.loansSynced + ' emprunt(s) synchronises.', 'success');
+  else showToast('Echec : ' + (r.data.error || 'erreur inconnue'), 'error');
+  checkSyncStatus();
 });
 
-function switchTab(tab) {
-  ['Catalogue', 'Compte', 'Admin'].forEach(t => {
-    document.getElementById('view' + t).classList.toggle('hidden', t !== tab);
-    document.getElementById('tab' + t).classList.toggle('active', t === tab);
-  });
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('catalogueplus_theme', theme);
 }
-document.getElementById('tabCatalogue').addEventListener('click', () => switchTab('Catalogue'));
-document.getElementById('tabCompte').addEventListener('click', () => switchTab('Compte'));
-document.getElementById('tabAdmin').addEventListener('click', () => switchTab('Admin'));
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+const savedTheme = localStorage.getItem('catalogueplus_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+applyTheme(savedTheme);
 
-loadBooks();
-checkStatus();
-setInterval(checkStatus, 30000);
+checkAuth();
+checkSyncStatus();
+setInterval(checkSyncStatus, 30000);
+switchTab('accueil');
 </script>
 </body>
 </html>
